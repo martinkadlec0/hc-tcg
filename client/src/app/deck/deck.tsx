@@ -83,6 +83,9 @@ const Deck = ({setMenuSection}: Props) => {
 			type: 'UPDATE_DECK',
 			payload: pickedCards.map((card) => card.cardId),
 		})
+
+		localStorage.setItem('Loadout_default', JSON.stringify(pickedCards))
+
 		setMenuSection('mainmenu')
 	}
 
@@ -91,7 +94,6 @@ const Deck = ({setMenuSection}: Props) => {
 	}
 	const saveDeck = () => {
 		localStorage.setItem('Loadout_' + deckName, JSON.stringify(pickedCards))
-		console.log(JSON.stringify(pickedCards))
 	}
 	const loadDeck = () => {
 		const deck = localStorage.getItem('Loadout_' + deckName)

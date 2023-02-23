@@ -8,6 +8,8 @@ import css from './main-menu.module.css'
 import {logout} from 'logic/session/session-actions'
 import TcgLogo from 'components/tcg-logo'
 import LinkContainer from 'components/link-container'
+import {useEffect} from 'react'
+import {CardT} from 'types/game-state'
 
 type Props = {
 	setMenuSection: (section: string) => void
@@ -20,6 +22,19 @@ function MainMenu({setMenuSection}: Props) {
 	const handleJoinPrivateGame = () => dispatch(joinPrivateGame())
 	const handleLogOut = () => dispatch(logout())
 	const handleDeck = () => setMenuSection('deck')
+
+	useEffect(() => {
+		let loadout = localStorage.getItem('Loadout_default')
+
+		if (loadout != null) {
+			let cards: CardT[] = JSON.parse(loadout)
+
+			dispatch({
+				type: 'UPDATE_DECK',
+				payload: cards.map((card) => card.cardId),
+			})
+		}
+	}, [])
 
 	return (
 		/* Background Image */
