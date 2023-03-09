@@ -122,6 +122,7 @@ function Game() {
 					onClick={(card: CardT) => selectCard(card)}
 					selected={selectedCard}
 					picked={pickedCardsInstances}
+					stack={true}
 				/>
 			</div>
 			{renderModal(openedModal, handleOpenModal)}
