@@ -172,7 +172,9 @@ export function applySingleUse(
 export function applyStatusEffect(
 	game: GameModel,
 	statusEffectId: string,
-	targetInstance: string | undefined
+	targetInstance: string | undefined,
+	customStatusEffectInstance?: string,
+	customDuration?: number
 ): GenericActionResult {
 	if (!targetInstance) return 'FAILURE_INVALID_DATA'
 
@@ -181,13 +183,17 @@ export function applyStatusEffect(
 	if (!pos) return 'FAILURE_INVALID_DATA'
 
 	const statusEffect = STATUS_EFFECT_CLASSES[statusEffectId]
-	const statusEffectInstance = Math.random().toString()
+	let statusEffectInstance = Math.random().toString()
+	if (customStatusEffectInstance) {
+		statusEffectInstance = customStatusEffectInstance
+	}
 
 	const statusEffectInfo: StatusEffectT = {
 		statusEffectId: statusEffectId,
 		statusEffectInstance: statusEffectInstance,
 		targetInstance: targetInstance,
 		damageEffect: statusEffect.damageEffect,
+		duration: customDuration,
 	}
 
 	statusEffect.onApply(game, statusEffectInfo, pos)
