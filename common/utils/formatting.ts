@@ -88,7 +88,7 @@ export function formatNodefromShorthand(
 	formatShorthand: string,
 	text: FormattedTextNode
 ): FormatNode {
-	let format = formatDict[formatShorthand]
+	const format = formatDict[formatShorthand]
 	if (format == undefined) {
 		throw new Error(`Format ${format} not found.`)
 	}
@@ -179,10 +179,10 @@ const messageParseOptions: Array<
 		},
 		(text: string, config: Config) => {
 			// Expecting the format $fFormat Node$ where f is a format character
-			let format = text[1]
+			const format = text[1]
 			text = text.slice(2)
 
-			let [node, remaining] = parseNodesUntil(
+			const [node, remaining] = parseNodesUntil(
 				text,
 				(remaining) => remaining.startsWith('$'),
 				config
@@ -303,7 +303,7 @@ const messageParseOptions: Array<
 ]
 
 function includesNotEscaped(text: string, sequence: string): boolean {
-	let index = text.indexOf(sequence)
+	const index = text.indexOf(sequence)
 	if (index == -1) {
 		return false
 	}
@@ -320,7 +320,7 @@ function includesNotEscaped(text: string, sequence: string): boolean {
 }
 
 function isAlphanumeric(char: string) {
-	let charCode = char.charCodeAt(0)
+	const charCode = char.charCodeAt(0)
 	return (
 		(charCode > 47 && charCode < 58) ||
 		(charCode > 64 && charCode < 91) ||
@@ -329,13 +329,13 @@ function isAlphanumeric(char: string) {
 }
 
 function createCensoredTextNodes(text: string): TextNode | ProfanityNode | ListNode {
-	let nodes = []
+	const nodes = []
 
 	let lowercaseText = text.toLowerCase()
 
 	for (const word of ProfaneWords) {
 		while (true) {
-			let startIndex = lowercaseText.indexOf(word)
+			const startIndex = lowercaseText.indexOf(word)
 
 			if (startIndex == -1) {
 				break
@@ -355,7 +355,7 @@ function createCensoredTextNodes(text: string): TextNode | ProfanityNode | ListN
 				}
 			}
 
-			let textBefore = text.slice(0, startIndex)
+			const textBefore = text.slice(0, startIndex)
 
 			if (isSpaceBefore && isSpaceAfter) {
 				if (textBefore.length > 0) {
@@ -428,7 +428,7 @@ function parseNodesWhile(
 	config: Config
 ): [FormattedTextNode, string] {
 	let remaining = text
-	let nodes: FormattedTextNode[] = []
+	const nodes: FormattedTextNode[] = []
 
 	try {
 		while (true) {
@@ -473,7 +473,7 @@ function parseNodesUntil(
 
 /* Parse all Nodes until the end of the string. */
 function parseNodesUntilEmpty(text: string, config: Config): FormattedTextNode {
-	let [nodes, _] = parseNodesWhile(text, (remaining) => remaining.length >= 1, config)
+	const [nodes, _] = parseNodesWhile(text, (remaining) => remaining.length >= 1, config)
 	return nodes
 }
 
@@ -494,7 +494,7 @@ function parseTextNode(text: string, config: Config): [FormattedTextNode, string
 
 /* Parse text into a single node */
 function parseSingleNode(text: string, config: Config): [FormattedTextNode, string] {
-	for (let [condition, parser] of messageParseOptions) {
+	for (const [condition, parser] of messageParseOptions) {
 		if (condition(text, config)) {
 			return parser(text, config)
 		}
@@ -536,7 +536,7 @@ export function formatText(text: string, config?: Config): FormattedTextNode {
 
 /* Censor a string using `common/config/profanity-seed.json`. */
 export function censorString(text: string) {
-	let node = createCensoredTextNodes(text)
+	const node = createCensoredTextNodes(text)
 
 	if (node.TYPE === 'TextNode') {
 		return node.text
@@ -544,10 +544,10 @@ export function censorString(text: string) {
 		return censorProfanityNode(node)
 	}
 
-	let outputText = []
+	const outputText = []
 
-	let listNode = node as ListNode
-	for (let textNode of listNode.nodes) {
+	const listNode = node as ListNode
+	for (const textNode of listNode.nodes) {
 		if (textNode.TYPE === 'TextNode') {
 			outputText.push(textNode.text)
 		} else if (textNode.TYPE === 'ProfanityNode') {

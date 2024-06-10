@@ -99,9 +99,9 @@ function* randomMatchmakingSaga() {
 		const extraPlayer = root.queue.length % 2 === 1 ? root.queue.pop() || null : null
 
 		// Shuffle
-		for (var i = root.queue.length - 1; i > 0; i--) {
-			var randomPos = Math.floor(Math.random() * (i + 1))
-			var oldValue = root.queue[i]
+		for (let i = root.queue.length - 1; i > 0; i--) {
+			const randomPos = Math.floor(Math.random() * (i + 1))
+			const oldValue = root.queue[i]
 			root.queue[i] = root.queue[randomPos]
 			root.queue[randomPos] = oldValue
 		}
@@ -137,7 +137,7 @@ function* cleanUpSaga() {
 	// Clean up private games that have been around longer than 10 minutes
 	while (true) {
 		yield* delay(1000 * 30)
-		for (let code in root.privateQueue) {
+		for (const code in root.privateQueue) {
 			const info = root.privateQueue[code]
 			const overTenMinutes = Date.now() - info.createdTime > 1000 * 60 * 10
 			if (overTenMinutes) {
@@ -277,7 +277,7 @@ function* joinPrivateGame(msg: ClientMessage) {
 function* cancelPrivateGame(msg: ClientMessage) {
 	const {playerId} = msg
 
-	for (let code in root.privateQueue) {
+	for (const code in root.privateQueue) {
 		const info = root.privateQueue[code]
 		if (info.playerId && info.playerId === playerId) {
 			const player = root.players[info.playerId]
@@ -304,7 +304,7 @@ function onPlayerLeft(player: PlayerModel) {
 	}
 
 	// Private queue
-	for (let code in root.privateQueue) {
+	for (const code in root.privateQueue) {
 		const info = root.privateQueue[code]
 		if (info.playerId && info.playerId === player.id) {
 			delete root.privateQueue[code]

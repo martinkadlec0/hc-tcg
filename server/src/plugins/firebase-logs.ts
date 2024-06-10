@@ -71,7 +71,7 @@ export class FirebaseLogs {
 				}
 
 				let ref = '/logs'
-				let summaryObj: any = {
+				const summaryObj: any = {
 					startHand1: gameLog.startHand1,
 					startHand2: gameLog.startHand2,
 					startTimestamp: gameLog.startTimestamp,
@@ -83,14 +83,14 @@ export class FirebaseLogs {
 				if (gameLog.type === 'private') {
 					ref = `/private-logs/${game.code}`
 				}
-				let pid0 = playerStates[0].id
+				const pid0 = playerStates[0].id
 				root.players[pid0]?.socket.emit('gameoverstat', {
 					outcome: game.endInfo.outcome,
 					won: game.endInfo.winner === pid0,
 				})
 				summaryObj.deck1 = root.players[pid0]?.deck
 
-				let pid1 = playerStates[1].id
+				const pid1 = playerStates[1].id
 				root.players[pid1]?.socket.emit('gameoverstat', {
 					outcome: game.endInfo.outcome,
 					won: game.endInfo.winner === pid1,

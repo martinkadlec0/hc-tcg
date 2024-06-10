@@ -17,7 +17,7 @@ export function flipCoin(
 		return []
 	}
 
-	let coinFlips: Array<CoinFlipT> = []
+	const coinFlips: Array<CoinFlipT> = []
 	for (let i = 0; i < times; i++) {
 		if (forceHeads) {
 			coinFlips.push('heads')

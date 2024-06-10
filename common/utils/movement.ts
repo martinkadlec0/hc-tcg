@@ -70,7 +70,7 @@ export function discardCard(
 
 export function retrieveCard(game: GameModel, card: CardT | null) {
 	if (!card) return
-	for (let playerId in game.state.players) {
+	for (const playerId in game.state.players) {
 		const player = game.state.players[playerId]
 		const discarded = player.discarded
 		const index = discarded.findIndex((c) => equalCard(c, card))
@@ -228,7 +228,7 @@ export function swapSlots(
 	if (slotA.type !== slotB.type) return false
 
 	// Info about non-empty slots
-	let cardsInfo: any = []
+	const cardsInfo: any = []
 
 	// Make sure each card can be placed in the other slot
 	const cardA = getSlotCard(slotAPos)
@@ -273,22 +273,22 @@ export function swapSlots(
 
 	// Swap
 	if (slotA.type === 'hermit') {
-		let tempCard = rowA.hermitCard
+		const tempCard = rowA.hermitCard
 		rowA.hermitCard = rowB.hermitCard
 		rowB.hermitCard = tempCard
 	} else if (slotA.type === 'effect') {
-		let tempCard = rowA.effectCard
+		const tempCard = rowA.effectCard
 		rowA.effectCard = rowB.effectCard
 		rowB.effectCard = tempCard
 	} else if (slotA.type === 'item') {
-		let tempCard = rowA.itemCards[slotA.index]
+		const tempCard = rowA.itemCards[slotA.index]
 		rowA.itemCards[slotA.index] = rowB.itemCards[slotB.index]
 		rowB.itemCards[slotB.index] = tempCard
 	}
 
 	if (!withoutDetach) {
 		// onAttach
-		for (let {cardInfo, card} of cardsInfo) {
+		for (const {cardInfo, card} of cardsInfo) {
 			// New card position after swap
 			const cardPos = getCardPos(game, card.cardInstance)
 			if (!cardPos) continue

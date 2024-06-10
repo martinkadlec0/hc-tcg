@@ -80,7 +80,7 @@ function getAvailableActions(game: GameModel, availableEnergy: Array<EnergyT>): 
 	if (pickRequests.length > 0) {
 		const request = pickRequests[0]
 		if (request.playerId === currentPlayer.id) {
-			let pickActions: TurnActions = ['PICK_REQUEST']
+			const pickActions: TurnActions = ['PICK_REQUEST']
 			if (su && !suUsed) {
 				pickActions.push('REMOVE_EFFECT')
 			}
@@ -160,7 +160,7 @@ function getAvailableActions(game: GameModel, availableEnergy: Array<EnergyT>): 
 	// Filter out actions that have already been completed - once an action is completed it cannot be used again for the turn
 	// Also filter out blocked actions
 	const blockedActions = game.getAllBlockedActions()
-	let filteredActions = actions.filter((action) => {
+	const filteredActions = actions.filter((action) => {
 		return !turnState.completedActions.includes(action) && !blockedActions.includes(action)
 	})
 
@@ -181,10 +181,10 @@ function playerAction(actionType: string, playerId: string) {
 function* checkHermitHealth(game: GameModel) {
 	const playerStates: Array<PlayerState> = Object.values(game.state.players)
 	const deadPlayerIds: Array<string> = []
-	for (let playerState of playerStates) {
+	for (const playerState of playerStates) {
 		const playerRows = playerState.board.rows
 		const activeRow = playerState.board.activeRow
-		for (let rowIndex in playerRows) {
+		for (const rowIndex in playerRows) {
 			const row = playerRows[rowIndex]
 			if (row.hermitCard && row.health <= 0) {
 				// Add battle log entry
@@ -335,7 +335,7 @@ function* turnActionsSaga(game: GameModel) {
 
 			// Available actions code
 			const availableEnergy = getAvailableEnergy(game)
-			let blockedActions: Array<TurnAction> = []
+			const blockedActions: Array<TurnAction> = []
 			let availableActions = getAvailableActions(game, availableEnergy)
 
 			// Get blocked actions from hooks
@@ -416,7 +416,7 @@ function* turnActionsSaga(game: GameModel) {
 				const currentPickRequest = game.state.pickRequests[0]
 				if (currentPickRequest) {
 					if (currentPickRequest.playerId === currentPlayerId) {
-						if (!!currentAttack) {
+						if (currentAttack) {
 							reset = true
 						}
 					} else {
@@ -428,7 +428,7 @@ function* turnActionsSaga(game: GameModel) {
 				const currentModalRequest = game.state.modalRequests[0]
 				if (currentModalRequest) {
 					if (currentModalRequest.playerId === currentPlayerId) {
-						if (!!currentAttack) {
+						if (currentAttack) {
 							reset = true
 						}
 					} else {

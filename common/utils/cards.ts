@@ -28,7 +28,7 @@ export const isRemovable = (card: CardT) => {
 }
 
 export function getCardExpansion(cardId: string) {
-	let expansion: string = CARDS[cardId].getExpansion()
+	const expansion: string = CARDS[cardId].getExpansion()
 
 	return expansion
 }

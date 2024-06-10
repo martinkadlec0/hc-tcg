@@ -93,7 +93,7 @@ function* attackSaga(
 	if (!defenceRow.hermitCard) return 'FAILURE_CANNOT_COMPLETE'
 
 	// Get initial attacks
-	let attacks: Array<AttackModel> = getAttack(game, attackPos, hermitAttackType)
+	const attacks: Array<AttackModel> = getAttack(game, attackPos, hermitAttackType)
 
 	// Run all the code stuff
 	executeAttacks(game, attacks)

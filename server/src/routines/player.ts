@@ -67,7 +67,7 @@ function* playerDisconnectedSaga(action: any) {
 
 function* updateDeckSaga(action: any) {
 	const {playerId} = action
-	let newDeck = action.payload
+	const newDeck = action.payload
 	const player = root.players[playerId]
 	if (!player) return
 	player.setPlayerDeck(newDeck)
@@ -80,7 +80,7 @@ function* updateDeckSaga(action: any) {
 
 function* updateMinecraftNameSaga(action: any) {
 	const {playerId} = action
-	let minecraftName = action.payload
+	const minecraftName = action.payload
 	const player = root.players[playerId]
 	if (!player) return
 	player.setMinecraftName(minecraftName)

@@ -32,6 +32,9 @@ jobs:
       - name: Run server tsc
         run: npm run server:tsc
 
+      - name: Run eslint
+        run: npx eslint .
+
       - name: Run prettier
         run: npx prettier --check .
 

@@ -65,8 +65,8 @@ export function printHooksState(game: GameModel) {
 		// Sort by row
 		instancesInfo = Object.fromEntries(
 			Object.entries(instancesInfo).sort(([, valueA], [, valueB]) => {
-				let aRow = valueA.row
-				let bRow = valueB.row
+				const aRow = valueA.row
+				const bRow = valueB.row
 				if (aRow === null && bRow === null) return 0
 				if (aRow === null) return -1
 				if (bRow === null) return 1
@@ -152,7 +152,7 @@ export function printHooksState(game: GameModel) {
 
 		const custom = customValues[instance]
 		if (custom) {
-			let output = custom.keyName
+			const output = custom.keyName
 				? custom.keyName + ' = ' + custom.value
 				: custom.id + ':' + instance + ' = ' + custom.value
 			console.log(colorize(output, 'brightMagenta'))

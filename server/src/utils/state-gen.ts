@@ -63,7 +63,7 @@ export function getStarterPack() {
 
 	const deck: Array<Card> = []
 
-	let itemCounts = {
+	const itemCounts = {
 		[hermitTypes[0]]: {
 			items: 0,
 			tokens: 0,
@@ -102,8 +102,8 @@ export function getStarterPack() {
 	}
 
 	// items
-	for (let hermitType in itemCounts) {
-		let counts = itemCounts[hermitType]
+	for (const hermitType in itemCounts) {
+		const counts = itemCounts[hermitType]
 
 		for (let i = 0; i < counts.items; i++) {
 			deck.push(CARDS[`item_${hermitType}_common`])

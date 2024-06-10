@@ -119,7 +119,7 @@ export class WaterfallHook<T extends (...args: any) => Parameters<T>[0]> extends
 	}
 
 	public override call(...params: Parameters<T>): Parameters<T>[0] {
-		let newParams = params
+		const newParams = params
 		const hooks = Object.values(this.listeners)
 		for (let i = 0; i < hooks.length; i++) {
 			newParams[0] = hooks[i](...(newParams as Array<any>))

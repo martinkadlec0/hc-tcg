@@ -23,7 +23,7 @@ class SplashPotionOfHealingIISingleUseCard extends SingleUseCard {
 		const {player} = pos
 
 		player.hooks.onApply.add(instance, () => {
-			for (let row of player.board.rows) {
+			for (const row of player.board.rows) {
 				if (!row.hermitCard) continue
 				const hermitInfo = HERMIT_CARDS[row.hermitCard.cardId]
 				if (hermitInfo) {

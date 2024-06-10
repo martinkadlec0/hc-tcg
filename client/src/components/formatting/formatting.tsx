@@ -9,16 +9,16 @@ type DisplaySettings = {
 }
 
 function nodeToHtml(node: FormattedTextNode, settings: DisplaySettings) {
-	let textCssClasses = []
+	const textCssClasses = []
 
 	if (settings.isSelectable != false) {
 		textCssClasses.push(css['selectable'])
 	}
 
 	if (node.TYPE == 'ListNode') {
-		let html = []
+		const html = []
 
-		for (let child of node.nodes) {
+		for (const child of node.nodes) {
 			html.push(nodeToHtml(child, settings))
 		}
 		return <span>{html}</span>

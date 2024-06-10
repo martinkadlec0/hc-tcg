@@ -4,7 +4,7 @@ import Card from '../cards/base/card'
 import {CARDS} from '../cards'
 
 export function getCardRank(cardId: string): RankT {
-	let rank: RankT = {name: 'stone', cost: 0}
+	const rank: RankT = {name: 'stone', cost: 0}
 	if ((RANKS as Record<string, any>)[cardId]) {
 		rank.cost = (RANKS as Record<string, any>)[cardId]
 
