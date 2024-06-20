@@ -27,7 +27,7 @@ jobs:
         run: npm ci
 
       - name: Create debug config
-        run: cp ./common/config/debug-config.example.json ./common/config/debug-config.json
+        run: cp debug-config.example.json debug-config.json
 
       - name: Run server tsc
         run: npm run server:tsc
@@ -60,7 +60,7 @@ jobs:
         run: npm ci
 
       - name: Create debug config
-        run: cp ./common/config/debug-config.example.json ./common/config/debug-config.json
+        run: cp debug-config.example.json debug-config.json
 
       - name: Build
         run: npm run build

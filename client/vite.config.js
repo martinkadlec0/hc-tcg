@@ -1,7 +1,7 @@
 import path from 'path'
 import {defineConfig} from 'vite'
 import react from '@vitejs/plugin-react'
-import CONFIG from '../common/config/server-config.json'
+import CONFIG from './../server-config.json'
 import {getAppVersion} from '../version'
 
 export default defineConfig({

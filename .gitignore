@@ -24,7 +24,7 @@ client/dist-ssr
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-common/config/debug-config.json
+debug-config.json
 
 # Editor directories and files
 .vscode/*
