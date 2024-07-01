@@ -103,7 +103,7 @@ class HumanCleoRareHermitCard extends HermitCard {
 					canPick: pickCondition,
 					onResult(pickedSlot) {
 						const rowIndex = pickedSlot.rowIndex
-						if (!pickedSlot.card || !rowIndex === null) return
+						if (!pickedSlot.card || rowIndex === null) return
 
 						// Remove the hook straight away
 						opponentPlayer.hooks.getAttackRequests.remove(instance)

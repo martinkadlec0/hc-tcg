@@ -45,7 +45,7 @@ class OrionSoundRareHermitCard extends HermitCard {
 				canPick: slot.every(slot.not(slot.empty), slot.hermitSlot),
 				onResult(pickedSlot) {
 					const rowIndex = pickedSlot.rowIndex
-					if (!pickedSlot.card || !rowIndex === null) return
+					if (!pickedSlot.card || rowIndex === null) return
 
 					applyStatusEffect(game, 'melody', pickedSlot.card.cardInstance)
 					player.custom[instanceKey].push(pickedSlot.card.cardInstance)
