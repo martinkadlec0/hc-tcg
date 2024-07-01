@@ -22,6 +22,7 @@ import EffectCard from 'common/cards/base/effect-card'
 import {CardPosModel} from 'common/models/card-pos-model'
 import {getCardCost, getCardRank} from 'common/utils/ranks'
 import {HermitAttackType} from 'common/types/attack'
+import {VirtualPlayerModel} from 'common/models/virtual-player-model'
 
 ////////////////////////////////////////
 // @TODO sort this whole thing out properly
@@ -139,19 +140,17 @@ export function getStarterPack() {
 	return deckIds
 }
 
-export function getEmptyRow(): RowState {
-	const MAX_ITEMS = 3
-
+export function getEmptyRow(maxItems: number): RowState {
 	const rowState: RowState = {
 		hermitCard: null,
 		effectCard: null,
-		itemCards: new Array(MAX_ITEMS).fill(null),
+		itemCards: new Array(maxItems).fill(null),
 		health: null,
 	}
 	return rowState
 }
 
-export function getPlayerState(player: PlayerModel): PlayerState {
+export function getPlayerState(player: PlayerModel | VirtualPlayerModel): PlayerState {
 	const allCards = Object.values(CARDS).map(
 		(card: Card): CardT => ({
 			cardId: card.id,
@@ -199,10 +198,12 @@ export function getPlayerState(player: PlayerModel): PlayerState {
 		hand.unshift(cardInfo)
 	}
 
-	const TOTAL_ROWS = 5
+	const TOTAL_ROWS = 5,
+		MAX_ITEMS = 3
 	return {
 		id: player.id,
 		playerName: player.name,
+		playerType: player.socket ? 'real' : 'virtual',
 		minecraftName: player.minecraftName,
 		playerDeck: pack,
 		censoredPlayerName: player.censoredName,
@@ -216,7 +217,7 @@ export function getPlayerState(player: PlayerModel): PlayerState {
 			activeRow: null,
 			singleUseCard: null,
 			singleUseCardUsed: false,
-			rows: new Array(TOTAL_ROWS).fill(null).map(getEmptyRow),
+			rows: new Array(TOTAL_ROWS).fill(null).map(() => getEmptyRow(MAX_ITEMS)),
 		},
 
 		hooks: {
@@ -265,7 +266,10 @@ export function getLocalPlayerState(playerState: PlayerState): LocalPlayerState 
 	return localPlayerState
 }
 
-export function getLocalGameState(game: GameModel, player: PlayerModel): LocalGameState | null {
+export function getLocalGameState(
+	game: GameModel,
+	player: PlayerModel | VirtualPlayerModel
+): LocalGameState | null {
 	const opponentPlayerId = game.getPlayerIds().find((id) => id !== player.id)
 	if (!opponentPlayerId) {
 		return null
@@ -328,6 +332,8 @@ export function getLocalGameState(game: GameModel, player: PlayerModel): LocalGa
 		players,
 
 		timer: game.state.timer,
+
+		isBossGame: game.state.isBossGame,
 	}
 
 	return localGameState

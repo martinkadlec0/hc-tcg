@@ -3,6 +3,7 @@ import css from './main-menu.module.scss'
 import {useSelector, useDispatch} from 'react-redux'
 import Slider from 'components/slider'
 import {setSetting} from 'logic/local-settings/local-settings-actions'
+import {controlVoiceTest} from 'logic/sound/sound-actions'
 import {getSettings} from 'logic/local-settings/local-settings-selectors'
 import {getStats} from 'logic/fbdb/fbdb-selectors'
 import MenuLayout from 'components/menu-layout'
@@ -24,6 +25,14 @@ function Settings({setMenuSection}: Props) {
 	const handleMusicChange = (ev: React.SyntheticEvent<HTMLInputElement>) => {
 		dispatch(setSetting('musicVolume', ev.currentTarget.value))
 	}
+	const handleVoiceChange = (ev: React.SyntheticEvent<HTMLInputElement>) => {
+		dispatch(setSetting('voiceVolume', ev.currentTarget.value))
+		dispatch(controlVoiceTest('PLAY'))
+	}
+	const changeMenuSection = (section: string) => {
+		dispatch(controlVoiceTest('STOP'))
+		setMenuSection(section)
+	}
 
 	const handlePanoramaToggle = () => {
 		dispatch(setSetting('panoramaEnabled', !settings.panoramaEnabled))
@@ -35,10 +44,10 @@ function Settings({setMenuSection}: Props) {
 		if (value !== '0') return `${value}%`
 		return 'Disabled'
 	}
-	const handleGameSettings = () => setMenuSection('game-settings')
-	const handleDataSettings = () => setMenuSection('data-settings')
+	const handleGameSettings = () => changeMenuSection('game-settings')
+	const handleDataSettings = () => changeMenuSection('data-settings')
 
-	const handleCredits = () => setMenuSection('credits')
+	const handleCredits = () => changeMenuSection('credits')
 
 	const [updatesOpen, setUpdatesOpen] = useState<boolean>(false)
 	const handleUpdates = () => {
@@ -53,7 +62,7 @@ function Settings({setMenuSection}: Props) {
 				<></>
 			)}
 			<MenuLayout
-				back={() => setMenuSection('mainmenu')}
+				back={() => changeMenuSection('mainmenu')}
 				title="More"
 				returnText="Main Menu"
 				className={css.settingsMenu}
@@ -64,6 +73,9 @@ function Settings({setMenuSection}: Props) {
 					</Slider>
 					<Slider value={settings.soundVolume} onInput={handleSoundChange}>
 						Sounds: {getPercDescriptor(settings.soundVolume)}
+					</Slider>
+					<Slider value={settings.voiceVolume} onInput={handleVoiceChange}>
+						Voice: {getPercDescriptor(settings.voiceVolume)}
 					</Slider>
 					<Button variant="stone" onClick={handlePanoramaToggle}>
 						Panorama: {getBoolDescriptor(settings.panoramaEnabled)}

@@ -33,7 +33,7 @@ function* sendGameStateOnReconnect(game: GameModel, action: AnyAction) {
 function* statusChangedSaga(game: GameModel, action: AnyAction) {
 	const playerId = (action.payload as PlayerModel).id
 	const opponentId = getOpponentId(game, playerId)
-	const connectionStatus = game.players[playerId]?.socket.connected
+	const connectionStatus = game.players[playerId]?.socket?.connected
 	broadcast([game.players[opponentId]], 'OPPONENT_CONNECTION', connectionStatus)
 }
 

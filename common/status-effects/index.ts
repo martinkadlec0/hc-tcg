@@ -10,6 +10,7 @@ import DyedStatusEffect from './dyed'
 import MuseumCollectionStatusEffect from './museum-collection'
 import SmeltingStatusEffect from './smelting'
 import MelodyStatusEffect from './melody'
+import ExBossNineStatusEffect from './exboss-nine'
 import UsedClockStatusEffect from './used-clock'
 
 const effectClasses: Array<StatusEffect> = [
@@ -24,6 +25,7 @@ const effectClasses: Array<StatusEffect> = [
 	new MuseumCollectionStatusEffect(),
 	new SmeltingStatusEffect(),
 	new MelodyStatusEffect(),
+	new ExBossNineStatusEffect(),
 	new UsedClockStatusEffect(),
 ]
 

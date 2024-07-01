@@ -20,6 +20,7 @@ import {getCardPos} from 'common/models/card-pos-model'
 import {printHooksState} from '../utils'
 import {buffers} from 'redux-saga'
 import {AttackActionData, PickCardActionData, attackToAttackAction} from 'common/types/action-data'
+import {AI_CLASSES, virtualPlayerActionSaga} from './virtual'
 
 ////////////////////////////////////////
 // @TODO sort this whole thing out properly
@@ -198,7 +199,7 @@ function* checkHermitHealth(game: GameModel) {
 				discardCard(game, row.effectCard)
 
 				row.itemCards.forEach((itemCard) => itemCard && discardCard(game, itemCard))
-				playerRows[rowIndex] = getEmptyRow()
+				playerRows[rowIndex] = getEmptyRow(row.itemCards.length)
 				if (Number(rowIndex) === activeRow) {
 					game.changeActiveRow(playerState, null)
 					playerState.hooks.onActiveRowChange.call(activeRow, null)
@@ -209,6 +210,7 @@ function* checkHermitHealth(game: GameModel) {
 					playerState.lives -= 1
 
 					// reward card
+					if (game.rules.disableRewardCards) continue
 					const opponentState = playerStates.find((s) => s.id !== playerState.id)
 					if (!opponentState) continue
 					const rewardCard = playerState.pile.shift()
@@ -233,6 +235,7 @@ function* checkHermitHealth(game: GameModel) {
 
 function* sendGameState(game: GameModel) {
 	game.getPlayers().forEach((player) => {
+		if (!player.socket) return
 		const localGameState = getLocalGameState(game, player)
 
 		player.socket.emit('GAME_STATE', {
@@ -311,6 +314,17 @@ function* turnActionSaga(game: GameModel, turnAction: any) {
 	if (endTurn) {
 		return 'END_TURN'
 	}
+}
+
+function getPlayerAI(game: GameModel) {
+	const activePlayerId = game.state.turn.opponentAvailableActions.includes('WAIT_FOR_TURN')
+		? game.currentPlayerId
+		: game.opponentPlayerId
+	const activePlayer = game.players[activePlayerId]
+
+	if (activePlayer.socket) return
+
+	return AI_CLASSES[activePlayer.ai]
 }
 
 function* turnActionsSaga(game: GameModel) {
@@ -405,6 +419,9 @@ function* turnActionsSaga(game: GameModel) {
 
 			yield* call(sendGameState, game)
 			game.battleLog.sendLogs()
+
+			const playerAI = getPlayerAI(game)
+			if (playerAI) yield* fork(virtualPlayerActionSaga, game, playerAI)
 
 			const raceResult = yield* race({
 				turnAction: take(turnActionChannel),
@@ -567,7 +584,8 @@ function* turnSaga(game: GameModel) {
 		} else if (
 			!DEBUG_CONFIG.disableDeckOut &&
 			!DEBUG_CONFIG.startWithAllCards &&
-			!DEBUG_CONFIG.unlimitedCards
+			!DEBUG_CONFIG.unlimitedCards &&
+			!(game.rules.disableVirtualDeckOut && currentPlayer.playerType === 'virtual')
 		) {
 			game.endInfo.reason = 'cards'
 			game.endInfo.deadPlayerIds = [currentPlayerId]

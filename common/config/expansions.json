@@ -4,7 +4,8 @@
 		"alter_egos": "Alter Egos",
 		"alter_egos_ii": "Alter Egos Pt. II",
 		"advent_of_tcg": "Advent of TCG",
-		"dream": "Dream"
+		"dream": "Dream",
+		"boss": "Boss"
 	},
-	"disabled": ["advent_of_tcg", "dream"]
+	"disabled": ["advent_of_tcg", "dream", "boss"]
 }

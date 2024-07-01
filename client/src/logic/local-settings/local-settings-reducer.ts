@@ -18,6 +18,7 @@ const getSettings = (): LocalSettings => {
 const defaultState: LocalSettings = {
 	soundVolume: '100',
 	musicVolume: '75',
+	voiceVolume: '75',
 	profanityFilter: 'on',
 	disableChat: 'off',
 	confirmationDialogs: 'on',

@@ -39,9 +39,9 @@ class LDShadowLadyRareHermitCard extends HermitCard {
 			)
 				return
 
-			const opponentInactiveRows = getNonEmptyRows(opponentPlayer, true, true)
+			const opponentOccupiedRows = getNonEmptyRows(opponentPlayer, false, true)
 
-			if (opponentInactiveRows.length === 4) return
+			if (opponentOccupiedRows.length === opponentPlayer.board.rows.length) return
 			if (opponentPlayer.board.activeRow === null) return
 
 			// Make sure opponent Hermit isn't dead

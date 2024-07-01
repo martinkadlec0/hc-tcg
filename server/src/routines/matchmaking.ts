@@ -6,6 +6,7 @@ import {getGamePlayerOutcome, getWinner, getGameOutcome} from '../utils/win-cond
 import {getLocalGameState} from '../utils/state-gen'
 import {PlayerModel} from 'common/models/player-model'
 import root from '../serverRoot'
+import {VirtualPlayerModel} from 'common/models/virtual-player-model'
 
 export type ClientMessage = {
 	type: string
@@ -20,7 +21,7 @@ function* gameManager(game: GameModel) {
 		const playerIds = game.getPlayerIds()
 		const players = game.getPlayers()
 
-		const gameType = game.code ? 'Private' : 'Public'
+		const gameType = players.every((p) => p.socket) ? (game.code ? 'Private' : 'Public') : 'PvE'
 		console.log(
 			`${gameType} game started.`,
 			`Players: ${players[0].name} + ${players[1].name}.`,
@@ -187,6 +188,47 @@ function* leaveQueue(msg: ClientMessage) {
 	}
 }
 
+function* createBossGame(msg: ClientMessage) {
+	const {playerId} = msg
+	const player = root.players[playerId]
+	if (!player) {
+		console.log('[Create Boss game] Player not found: ', playerId)
+		return
+	}
+
+	if (inGame(playerId) || inQueue(playerId)) {
+		console.log('[Create Boss game] Player is already in game or queue:', player.name)
+		broadcast([player], 'CREATE_BOSS_GAME_FAILURE')
+		return
+	}
+
+	broadcast([player], 'CREATE_BOSS_GAME_SUCCESS')
+
+	const EX_BOSS_PLAYER = new VirtualPlayerModel('EX', 'EvilXisuma', 'evilxisuma_boss')
+	EX_BOSS_PLAYER.deck.cards = [{cardId: 'evilxisuma_boss', cardInstance: Math.random().toString()}]
+
+	const newBossGame = new GameModel(player, EX_BOSS_PLAYER, 'BOSS')
+	newBossGame.state.isBossGame = true
+	if (newBossGame.state.order[0] !== playerId) {
+		newBossGame.state.order.reverse()
+		newBossGame.state.turn.currentPlayerId = playerId
+	}
+
+	const {[playerId]: challengerState, [EX_BOSS_PLAYER.id]: bossState} = newBossGame.state.players
+	challengerState.board.rows = challengerState.board.rows.splice(0, 3)
+	const bossRowState = bossState.board.rows[0]
+	bossRowState.itemCards = []
+	bossState.board.rows = [bossRowState]
+	newBossGame.rules = {
+		disableRewardCards: true,
+		disableVirtualDeckOut: true,
+	}
+
+	root.addGame(newBossGame)
+
+	yield* fork(gameManager, newBossGame)
+}
+
 function* createPrivateGame(msg: ClientMessage) {
 	const {playerId} = msg
 	const player = root.players[playerId]
@@ -317,6 +359,7 @@ function* matchmakingSaga() {
 		takeEvery('LEAVE_QUEUE', leaveQueue),
 
 		takeEvery('CREATE_PRIVATE_GAME', createPrivateGame),
+		takeEvery('CREATE_BOSS_GAME', createBossGame),
 		takeEvery('JOIN_PRIVATE_GAME', joinPrivateGame),
 		takeEvery('CANCEL_PRIVATE_GAME', cancelPrivateGame),
 	])

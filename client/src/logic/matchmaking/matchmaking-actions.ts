@@ -39,3 +39,7 @@ export const invalidCode = () => ({
 export const waitingForPlayer = () => ({
 	type: 'WAITING_FOR_PLAYER' as const,
 })
+
+export const createBossGame = () => ({
+	type: 'CREATE_BOSS_GAME' as const,
+})

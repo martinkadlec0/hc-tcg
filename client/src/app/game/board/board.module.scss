@@ -31,6 +31,12 @@ $grid-size: 25px;
 	padding: 20px;
 }
 
+.playerBoard {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
 .row {
 	// $size: 9.5px;
 	$size: $grid-size;

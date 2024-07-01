@@ -63,6 +63,7 @@ nav {
 	gap: 1vh;
 	grid-template-areas:
 		'public'
+		'boss'
 		'private-create'
 		'private-join'
 		'deck'
@@ -73,6 +74,10 @@ nav {
 
 #public {
 	grid-area: public;
+}
+
+#boss {
+	grid-area: boss;
 }
 
 #privateCreate {
@@ -93,6 +98,37 @@ nav {
 
 #logout {
 	grid-area: logout;
+}
+
+/* Boss Landing Page */
+
+.bossLanding {
+	max-width: 70vh;
+	margin-inline: auto;
+	padding: 1vh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	overflow: hidden;
+}
+
+.bossRules {
+	display: flex;
+	gap: 1vh;
+	margin: 2vh 0;
+	overflow-y: auto;
+	flex-direction: column;
+
+	color: var(--text-light);
+	background: var(--gray-600);
+	border: 2px solid black;
+
+	padding: 1rem 0.5rem;
+
+	ol li {
+		list-style-type: decimal;
+		list-style-position: inside;
+	}
 }
 
 /* Settings Page */
@@ -256,6 +292,7 @@ nav {
 		grid-template-columns: 1fr 1fr;
 		grid-template-areas:
 			'public public'
+			'boss boss'
 			'private-create private-join'
 			'deck deck'
 			'logout settings';

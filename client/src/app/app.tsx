@@ -15,6 +15,7 @@ import Settings from './main-menu/settings'
 import GameSettings from './main-menu/game-settings'
 import DataSettings from './main-menu/data-settings'
 import Credits from './main-menu/credits'
+import BossLanding from './main-menu/boss-landing'
 import LostConnection from 'components/lost-connection'
 import Background from 'components/background'
 
@@ -50,6 +51,8 @@ function App() {
 					return <DataSettings setMenuSection={setMenuSection} />
 				case 'credits':
 					return <Credits setMenuSection={setMenuSection} />
+				case 'boss-landing':
+					return <BossLanding setMenuSection={setMenuSection} />
 				case 'mainmenu':
 				default:
 					return <MainMenu setMenuSection={setMenuSection} />

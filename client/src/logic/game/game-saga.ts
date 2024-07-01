@@ -30,6 +30,7 @@ import {
 import {getEndGameOverlay} from './game-selectors'
 import {LocalGameState} from 'common/types/game-state'
 import actionModalsSaga from './tasks/action-modals-saga'
+import {queueVoice} from 'logic/sound/sound-actions'
 
 function* actionSaga(): SagaIterator {
 	const turnAction = yield race({
@@ -101,12 +102,20 @@ function* gameStateReceiver(): SagaIterator {
 	}
 }
 
+function* voiceAnnounceReceiver(): SagaIterator {
+	// constantly forward @sound/VOICE_ANNOUNCE messages from the server to the store
+	while (true) {
+		const {payload} = yield call(receiveMsg, '@sound/VOICE_ANNOUNCE')
+		yield put(queueVoice(payload.lines))
+	}
+}
+
 function* gameActionsSaga(initialGameState?: LocalGameState): SagaIterator {
 	yield takeEvery('FORFEIT', function* () {
 		yield call(sendMsg, 'FORFEIT')
 	})
 
-	yield fork(gameStateReceiver)
+	yield all([fork(gameStateReceiver), fork(voiceAnnounceReceiver)])
 
 	yield takeLatest('GAME_STATE_RECEIVED', gameStateSaga)
 

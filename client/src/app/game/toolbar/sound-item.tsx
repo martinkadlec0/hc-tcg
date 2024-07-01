@@ -10,6 +10,7 @@ function SoundItem() {
 	const settings = useSelector(getSettings)
 	const [originalSoundVolume] = useState<string>(settings.soundVolume)
 	const [originalMusicVolume] = useState<string>(settings.musicVolume)
+	const [originalVoiceVolume] = useState<string>(settings.voiceVolume)
 
 	const handleSoundChange = () => {
 		// if volume is on, turn it off.
@@ -19,9 +20,12 @@ function SoundItem() {
 			settings.soundVolume !== '0' ? '0' : originalSoundVolume === '0' ? '100' : originalSoundVolume
 		const newMusicVolume =
 			settings.musicVolume !== '0' ? '0' : originalMusicVolume === '0' ? '100' : originalMusicVolume
+		const newVoiceVolume =
+			settings.voiceVolume !== '0' ? '0' : originalVoiceVolume === '0' ? '100' : originalVoiceVolume
 
 		dispatch(setSetting('soundVolume', newSoundVolume))
 		dispatch(setSetting('musicVolume', newMusicVolume))
+		dispatch(setSetting('voiceVolume', newVoiceVolume))
 	}
 
 	return (

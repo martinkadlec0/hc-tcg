@@ -5,12 +5,14 @@ import {
 	ActionResult,
 	TurnActions,
 	PlayerState,
+	GameRules,
 	Message,
 } from '../types/game-state'
 import {getGameState} from '../utils/state-gen'
 import {ModalRequest, PickRequest} from '../types/server-requests'
 import {BattleLogModel} from './battle-log-model'
 import {getSlotPos} from '../utils/board'
+import {VirtualPlayerModel} from './virtual-player-model'
 import {CARDS} from '../cards'
 
 export class GameModel {
@@ -20,7 +22,7 @@ export class GameModel {
 
 	public chat: Array<Message>
 	public battleLog: BattleLogModel
-	public players: Record<string, PlayerModel>
+	public players: Record<string, PlayerModel | VirtualPlayerModel>
 	public task: any
 	public state: GameState
 
@@ -31,7 +33,13 @@ export class GameModel {
 		reason: 'hermits' | 'lives' | 'cards' | 'time' | null
 	}
 
-	constructor(player1: PlayerModel, player2: PlayerModel, code: string | null = null) {
+	public rules: GameRules
+
+	constructor(
+		player1: PlayerModel | VirtualPlayerModel,
+		player2: PlayerModel | VirtualPlayerModel,
+		code: string | null = null
+	) {
 		this.internalCreatedTime = Date.now()
 		this.internalId = 'game_' + Math.random().toString()
 		this.internalCode = code
@@ -51,6 +59,8 @@ export class GameModel {
 			[player1.id]: player1,
 			[player2.id]: player2,
 		}
+
+		this.rules = {}
 
 		this.state = getGameState(this)
 	}

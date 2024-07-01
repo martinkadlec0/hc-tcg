@@ -9,3 +9,15 @@ export const playSound = (path: string) => ({
 	payload: path,
 })
 export type PlaySoundT = ReturnType<typeof playSound>
+
+export const queueVoice = (lines: string[]) => ({
+	type: '@sound/QUEUE_VOICE' as const,
+	payload: {lines},
+})
+export type QueueVoiceT = ReturnType<typeof queueVoice>
+
+export const controlVoiceTest = (payload: 'PLAY' | 'STOP') => ({
+	type: 'VOICE_TEST' as const,
+	payload,
+})
+export type VoiceTestControlT = ReturnType<typeof controlVoiceTest>

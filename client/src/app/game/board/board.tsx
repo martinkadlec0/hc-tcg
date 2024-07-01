@@ -43,7 +43,7 @@ function Board({onClick, localGameState}: Props) {
 
 	const PlayerBoard = (player: LocalPlayerState, direction: 'left' | 'right') => {
 		const rows = player.board.rows
-		const boardArray = new Array(5).fill(null)
+		const boardArray = new Array(rows.length).fill(null)
 
 		return (
 			<div className={css.playerBoard} id={css[direction]}>

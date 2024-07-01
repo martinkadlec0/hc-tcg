@@ -28,7 +28,9 @@ const HermitCardModule = memo(({card}: HermitCardProps) => {
 	const showCost = !useSelector(getGameState)
 	const name = card.getShortName()
 	const nameLength = name.length
-	const disabled = EXPANSIONS.disabled.includes(card.getExpansion()) ? 'disabled' : 'enabled'
+	const expansion = card.getExpansion()
+	const disabled =
+		EXPANSIONS.disabled.includes(expansion) && expansion !== 'boss' ? 'disabled' : 'enabled'
 
 	return (
 		<svg
