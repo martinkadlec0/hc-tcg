@@ -1,7 +1,7 @@
 version: '2.1'
 services:
   hctcg:
-    image: lunarmagpie/hc-tcg-dev:latest
+    image: benji42/hc-tcg:latest
     container_name: hc-tcg
     ports:
       - 9000:9000
