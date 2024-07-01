@@ -15,7 +15,7 @@ export function callSlotConditionWithPickInfo(
 	const opponentPlayerState = Object.values(game.state.players).filter(
 		(state) => state !== playerState
 	)[0]
-	const row = pickInfo.rowIndex ? playerState.board.rows[pickInfo.rowIndex] : null
+	const row = pickInfo.rowIndex !== null ? playerState.board.rows[pickInfo.rowIndex] : null
 
 	return condition(game, {
 		player: playerState,
