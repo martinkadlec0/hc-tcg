@@ -46,11 +46,16 @@ class PotatoBoyRareHermitCard extends HermitCard {
 
 			game
 				.filterSlots(
-					slot.every(slot.adjacentTo(slot.activeRow), slot.hermitSlot, slot.not(slot.empty))
+					slot.every(
+						slot.player,
+						slot.adjacentTo(slot.activeRow),
+						slot.hermitSlot,
+						slot.not(slot.empty)
+					)
 				)
 				.forEach(({row, rowIndex, card}) => {
-					if (!card || !rowIndex) return
-					let hermitInfo = CARDS[card?.cardId]
+					if (!card || rowIndex === null) return
+					const hermitInfo = CARDS[card?.cardId]
 					healHermit(row, 40)
 					game.battleLog.addEntry(
 						player.id,
