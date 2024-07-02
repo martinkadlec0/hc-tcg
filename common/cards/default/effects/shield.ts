@@ -1,20 +1,20 @@
-import {HERMIT_CARDS} from '../..'
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {isTargetingPos} from '../../../utils/attacks'
 import {discardCard} from '../../../utils/movement'
-import EffectCard from '../../base/effect-card'
+import Card, {Attach, attach} from '../../base/card'
 
-class ShieldEffectCard extends EffectCard {
-	constructor() {
-		super({
-			id: 'shield',
-			numericId: 88,
-			name: 'Shield',
-			rarity: 'common',
-			description:
-				'When the Hermit this card is attached to takes damage, that damage is reduced by up to 60hp, and then this card is discarded.',
-		})
+class ShieldEffectCard extends Card {
+	props: Attach = {
+		...attach,
+		id: 'shield',
+		numericId: 88,
+		name: 'Shield',
+		expansion: 'default',
+		rarity: 'common',
+		tokens: 2,
+		description:
+			'When the Hermit this card is attached to takes damage, that damage is reduced by up to 60hp, and then this card is discarded.',
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
@@ -35,7 +35,7 @@ class ShieldEffectCard extends EffectCard {
 			if (totalReduction < 60) {
 				const damageReduction = Math.min(attack.calculateDamage(), 60 - totalReduction)
 				player.custom[instanceKey] += damageReduction
-				attack.reduceDamage(this.id, damageReduction)
+				attack.reduceDamage(this.props.id, damageReduction)
 			}
 		})
 
@@ -45,7 +45,7 @@ class ShieldEffectCard extends EffectCard {
 			if (player.custom[instanceKey] !== undefined && player.custom[instanceKey] > 0 && row) {
 				discardCard(game, row.effectCard)
 				if (!row.hermitCard) return attack
-				const hermitName = HERMIT_CARDS[row.hermitCard?.cardId].name
+				const hermitName = row.hermitCard?.props.name
 				game.battleLog.addEntry(player.id, `$p${hermitName}'s$ $eShield$ was broken`)
 			}
 		})

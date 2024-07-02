@@ -1,20 +1,20 @@
-import {CARDS} from '../..'
 import {AttackModel} from '../../../models/attack-model'
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {applySingleUse, getActiveRowPos} from '../../../utils/board'
-import SingleUseCard from '../../base/single-use-card'
+import Card, {SingleUse, singleUse} from '../../base/card'
 
-class DiamondSwordSingleUseCard extends SingleUseCard {
-	constructor() {
-		super({
-			id: 'diamond_sword',
-			numericId: 14,
-			name: 'Diamond Sword',
-			rarity: 'rare',
-			description: "Do 40hp damage to your opponent's active Hermit.",
-			log: null,
-		})
+class DiamondSwordSingleUseCard extends Card {
+	props: SingleUse = {
+		...singleUse,
+		id: 'diamond_sword',
+		numericId: 14,
+		name: 'Diamond Sword',
+		expansion: 'default',
+		rarity: 'rare',
+		tokens: 1,
+		description: "Do 40hp damage to your opponent's active Hermit.",
+		hasAttack: true,
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
@@ -40,7 +40,7 @@ class DiamondSwordSingleUseCard extends SingleUseCard {
 				type: 'effect',
 				log: (values) =>
 					`${values.defaultLog} to attack ${values.target} for ${values.damage} damage`,
-			}).addDamage(this.id, 40)
+			}).addDamage(this.props.id, 40)
 
 			return swordAttack
 		})
@@ -58,10 +58,6 @@ class DiamondSwordSingleUseCard extends SingleUseCard {
 		const {player} = pos
 		player.hooks.getAttack.remove(instance)
 		player.hooks.onAttack.remove(instance)
-	}
-
-	override canAttack() {
-		return true
 	}
 }
 

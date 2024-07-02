@@ -1,6 +1,5 @@
 import {GameModel} from '../models/game-model'
-import {CardT, PlayerState} from '../types/game-state'
-import {CARDS} from '../cards'
+import {CardInstance, PlayerState} from '../types/game-state'
 import {CardPosModel, getCardPos} from '../models/card-pos-model'
 import {equalCard} from './cards'
 import {SlotInfo} from '../types/cards'
@@ -18,7 +17,7 @@ function discardAtPos(pos: CardPosModel) {
 		row.hermitCard = null
 	}
 
-	if (type === 'effect') {
+	if (type === 'attach') {
 		row.effectCard = null
 	}
 
@@ -29,12 +28,12 @@ function discardAtPos(pos: CardPosModel) {
 
 export function discardCard(
 	game: GameModel,
-	card: CardT | null,
+	card: CardInstance | null,
 	playerDiscard?: PlayerState | null
 ) {
 	if (!card) return
 
-	const pos = getCardPos(game, card.cardInstance)
+	const pos = getCardPos(game, card.instance)
 	if (!pos) {
 		const err = new Error()
 		console.log('Cannot find card on board: ', card, err.stack)
@@ -42,9 +41,8 @@ export function discardCard(
 	}
 
 	// Call `onDetach`
-	const cardInfo = CARDS[card.cardId]
-	cardInfo.onDetach(game, card.cardInstance, pos)
-	pos.player.hooks.onDetach.call(card.cardInstance)
+	card.card.onDetach(game, card.instance, pos)
+	pos.player.hooks.onDetach.call(card.instance)
 
 	// Remove the card
 	discardAtPos(pos)
@@ -52,14 +50,11 @@ export function discardCard(
 	if (playerDiscard !== null) {
 		const discardPlayer = playerDiscard ? playerDiscard : pos.player
 
-		discardPlayer.discarded.push({
-			cardId: card.cardId,
-			cardInstance: card.cardInstance,
-		})
+		discardPlayer.discarded.push(card)
 	}
 }
 
-export function retrieveCard(game: GameModel, card: CardT | null) {
+export function retrieveCard(game: GameModel, card: CardInstance | null) {
 	if (!card) return
 	for (let playerId in game.state.players) {
 		const player = game.state.players[playerId]
@@ -77,15 +72,13 @@ export function discardSingleUse(game: GameModel, playerState: PlayerState) {
 	const suCard = playerState.board.singleUseCard
 	const suUsed = playerState.board.singleUseCardUsed
 	if (!suCard) return
-	const pos = getCardPos(game, suCard.cardInstance)
+	const pos = getCardPos(game, suCard.instance)
 	if (!pos) return
 
-	// Water and Milk Buckets can be on this slot so we use CARDS to get the card info
-	const cardInfo = CARDS[suCard.cardId]
-	cardInfo.onDetach(game, suCard.cardInstance, pos)
+	suCard.card.onDetach(game, suCard.instance, pos)
 
 	// Call onDetach hook
-	playerState.hooks.onDetach.call(suCard.cardInstance)
+	playerState.hooks.onDetach.call(suCard.instance)
 
 	playerState.board.singleUseCardUsed = false
 	playerState.board.singleUseCard = null
@@ -97,15 +90,12 @@ export function discardSingleUse(game: GameModel, playerState: PlayerState) {
 	}
 }
 
-export function discardFromHand(player: PlayerState, card: CardT | null) {
+export function discardFromHand(player: PlayerState, card: CardInstance | null) {
 	if (!card) return
 
 	player.hand = player.hand.filter((c) => !equalCard(c, card))
 
-	player.discarded.push({
-		cardId: card.cardId,
-		cardInstance: card.cardInstance,
-	})
+	player.discarded.push(card)
 }
 
 export function drawCards(playerState: PlayerState, amount: number) {
@@ -115,18 +105,21 @@ export function drawCards(playerState: PlayerState, amount: number) {
 	}
 }
 
-export function moveCardToHand(game: GameModel, card: CardT, playerDiscard?: PlayerState | null) {
-	const cardPos = getCardPos(game, card.cardInstance)
+export function moveCardInstanceoHand(
+	game: GameModel,
+	card: CardInstance,
+	playerDiscard?: PlayerState | null
+) {
+	const cardPos = getCardPos(game, card.instance)
 	if (!cardPos) return
 
-	const cardInfo = CARDS[card.cardId]
-	cardInfo.onDetach(game, card.cardInstance, cardPos)
+	card.card.onDetach(game, card.instance, cardPos)
 
-	cardPos.player.hooks.onDetach.call(card.cardInstance)
+	cardPos.player.hooks.onDetach.call(card.instance)
 
 	if (cardPos.row && cardPos.type === 'hermit') {
 		cardPos.row.hermitCard = null
-	} else if (cardPos.row && cardPos.type === 'effect') {
+	} else if (cardPos.row && cardPos.type === 'attach') {
 		cardPos.row.effectCard = null
 	} else if (cardPos.row && cardPos.type === 'item' && cardPos.index !== null) {
 		cardPos.row.itemCards[cardPos.index] = null
@@ -140,15 +133,15 @@ export function moveCardToHand(game: GameModel, card: CardT, playerDiscard?: Pla
 	}
 }
 
-/**Returns a `CardT` of the card in the slot, or `null` if it's empty. */
-export function getSlotCard(slotPos: SlotInfo): CardT | null {
+/**Returns a `CardInstance` of the card in the slot, or `null` if it's empty. */
+export function getSlotCard(slotPos: SlotInfo): CardInstance | null {
 	const {row, index, type} = slotPos
 
 	if (!row || !index) return null
 
 	if (type === 'hermit') {
 		return row.hermitCard
-	} else if (type === 'effect') {
+	} else if (type === 'attach') {
 		return row.effectCard
 	}
 

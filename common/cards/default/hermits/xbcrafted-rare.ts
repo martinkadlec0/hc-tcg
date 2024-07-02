@@ -1,33 +1,34 @@
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {HermitAttackType} from '../../../types/attack'
-import HermitCard from '../../base/hermit-card'
 import {getActiveRowPos} from '../../../utils/board'
 import {slot} from '../../../slot'
+import Card, {Hermit, hermit} from '../../base/card'
 
-class XBCraftedRareHermitCard extends HermitCard {
-	constructor() {
-		super({
-			id: 'xbcrafted_rare',
-			numericId: 110,
-			name: 'xB',
-			rarity: 'rare',
-			hermitType: 'explorer',
-			health: 270,
-			primary: {
-				name: 'Giggle',
-				cost: ['explorer'],
-				damage: 50,
-				power: null,
-			},
-			secondary: {
-				name: 'Noice!',
-				cost: ['explorer', 'any'],
-				damage: 70,
-				power:
-					"Any effect card attached to your opponent's active Hermit is ignored during this turn.",
-			},
-		})
+class XBCraftedRareHermitCard extends Card {
+	props: Hermit = {
+		...hermit,
+		id: 'xbcrafted_rare',
+		numericId: 110,
+		name: 'xB',
+		expansion: 'default',
+		rarity: 'rare',
+		tokens: 1,
+		type: 'explorer',
+		health: 270,
+		primary: {
+			name: 'Giggle',
+			cost: ['explorer'],
+			damage: 50,
+			power: null,
+		},
+		secondary: {
+			name: 'Noice!',
+			cost: ['explorer', 'any'],
+			damage: 70,
+			power:
+				"Any effect card attached to your opponent's active Hermit is ignored during this turn.",
+		},
 	}
 
 	override getAttack(
@@ -57,7 +58,7 @@ class XBCraftedRareHermitCard extends HermitCard {
 			if (!opponentActivePos) return
 
 			// All attacks from our side should ignore opponent attached effect card this turn
-			attack.shouldIgnoreSlots.push(slot.every(slot.opponent, slot.effectSlot, slot.activeRow))
+			attack.shouldIgnoreSlots.push(slot.every(slot.opponent, slot.attachSlot, slot.activeRow))
 		})
 
 		player.hooks.onTurnEnd.add(instance, () => {

@@ -1,35 +1,37 @@
-import HermitCard from '../../base/hermit-card'
 import {GameModel} from '../../../models/game-model'
 import {CardPosModel} from '../../../models/card-pos-model'
 import {flipCoin} from '../../../utils/coinFlips'
 import {getActiveRow} from '../../../utils/board'
 import {hasEnoughEnergy} from '../../../utils/attacks'
-import {HERMIT_CARDS, ITEM_CARDS} from '../..'
 import {slot} from '../../../slot'
+import Card, {Hermit, hermit} from '../../base/card'
 
-class HumanCleoRareHermitCard extends HermitCard {
-	constructor() {
-		super({
-			id: 'humancleo_rare',
-			numericId: 132,
-			name: 'Human Cleo',
-			rarity: 'rare',
-			hermitType: 'pvp',
-			health: 270,
-			primary: {
-				name: 'Humanity',
-				cost: ['pvp'],
-				damage: 50,
-				power: null,
-			},
-			secondary: {
-				name: 'Betrayed',
-				cost: ['pvp', 'pvp'],
-				damage: 70,
-				power:
-					'Flip a coin twice.\nIf both are heads, your opponent must attack one of their own AFK Hermits on their next turn. Your opponent must have the necessary item cards attached to execute an attack.',
-			},
-		})
+class HumanCleoRareHermitCard extends Card {
+	props: Hermit = {
+		...hermit,
+		id: 'humancleo_rare',
+		numericId: 132,
+		name: 'Human Cleo',
+		expansion: 'alter_egos',
+		palette: 'alter_egos',
+		background: 'alter_egos',
+		rarity: 'rare',
+		tokens: 2,
+		type: 'pvp',
+		health: 270,
+		primary: {
+			name: 'Humanity',
+			cost: ['pvp'],
+			damage: 50,
+			power: null,
+		},
+		secondary: {
+			name: 'Betrayed',
+			cost: ['pvp', 'pvp'],
+			damage: 70,
+			power:
+				'Flip a coin twice.\nIf both are heads, your opponent must attack one of their own AFK Hermits on their next turn. Your opponent must have the necessary item cards attached to execute an attack.',
+		},
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
@@ -55,7 +57,7 @@ class HumanCleoRareHermitCard extends HermitCard {
 
 			const blockActions = () => {
 				// Start by removing blocked actions in case requirements are no longer met
-				game.removeBlockedActions(this.id, 'CHANGE_ACTIVE_HERMIT', 'END_TURN')
+				game.removeBlockedActions(this.props.id, 'CHANGE_ACTIVE_HERMIT', 'END_TURN')
 
 				// Return if the opponent has no AFK Hermits to attack
 				if (!game.someSlotFulfills(pickCondition)) return
@@ -64,16 +66,15 @@ class HumanCleoRareHermitCard extends HermitCard {
 				if (!opponentActiveRow) return
 
 				const energy = opponentActiveRow.itemCards.flatMap((item) => {
-					if (item) return ITEM_CARDS[item.cardId].hermitType
+					if (item) return item.props.type
 					return []
 				})
 
-				const opponentActiveHermit = HERMIT_CARDS[opponentActiveRow.hermitCard.cardId]
-
 				// Return if no energy
 				if (
-					!hasEnoughEnergy(energy, opponentActiveHermit.primary.cost) &&
-					!hasEnoughEnergy(energy, opponentActiveHermit.secondary.cost)
+					!opponentActiveRow.hermitCard.isHermit() ||
+					(!hasEnoughEnergy(energy, opponentActiveRow.hermitCard.props.primary.cost) &&
+						!hasEnoughEnergy(energy, opponentActiveRow.hermitCard.props.secondary.cost))
 				) {
 					return
 				}
@@ -84,7 +85,7 @@ class HumanCleoRareHermitCard extends HermitCard {
 				}
 
 				// The opponent needs to attack in this case, so prevent them switching or ending turn
-				game.addBlockedActions(this.id, 'CHANGE_ACTIVE_HERMIT', 'END_TURN')
+				game.addBlockedActions(this.props.id, 'CHANGE_ACTIVE_HERMIT', 'END_TURN')
 			}
 
 			opponentPlayer.hooks.onTurnStart.add(instance, blockActions)
@@ -98,7 +99,7 @@ class HumanCleoRareHermitCard extends HermitCard {
 
 				game.addPickRequest({
 					playerId: opponentPlayer.id,
-					id: this.id,
+					id: this.props.id,
 					message: 'Pick one of your AFK Hermits',
 					canPick: pickCondition,
 					onResult(pickedSlot) {
@@ -137,7 +138,7 @@ class HumanCleoRareHermitCard extends HermitCard {
 
 					const targetRow = opponentPlayer.board.rows[opponentTarget]
 					if (targetRow && targetRow.hermitCard) {
-						attack.setTarget(this.id, {
+						attack.setTarget(this.props.id, {
 							player: opponentPlayer,
 							rowIndex: opponentTarget,
 							row: targetRow,
@@ -146,7 +147,7 @@ class HumanCleoRareHermitCard extends HermitCard {
 				}
 
 				// They attacked now, they can end turn or change hermits with Chorus Fruit
-				game.removeBlockedActions(this.id, 'CHANGE_ACTIVE_HERMIT', 'END_TURN')
+				game.removeBlockedActions(this.props.id, 'CHANGE_ACTIVE_HERMIT', 'END_TURN')
 			})
 
 			opponentPlayer.hooks.onTurnEnd.add(instance, () => {
@@ -175,18 +176,6 @@ class HumanCleoRareHermitCard extends HermitCard {
 		opponentPlayer.hooks.beforeAttack.remove(instance)
 		opponentPlayer.hooks.onTurnEnd.remove(instance)
 		delete player.custom[this.getInstanceKey(instance, 'opponentTarget')]
-	}
-
-	override getExpansion() {
-		return 'alter_egos'
-	}
-
-	override getPalette() {
-		return 'alter_egos'
-	}
-
-	override getBackground() {
-		return 'alter_egos_background'
 	}
 }
 

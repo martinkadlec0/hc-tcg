@@ -1,6 +1,6 @@
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
-import {CardT} from '../../../types/game-state'
+import {CardInstance} from '../../../types/game-state'
 import SingleUseCard from '../../base/single-use-card'
 
 class GlowstoneSingleUseCard extends SingleUseCard {
@@ -43,9 +43,9 @@ class GlowstoneSingleUseCard extends SingleUseCard {
 					if (!modalResult.cards) return 'FAILURE_INVALID_DATA'
 					if (modalResult.cards.length !== 1) return 'FAILURE_INVALID_DATA'
 
-					const cards: Array<CardT> = modalResult.cards
-					const bottomCards: Array<CardT> = opponentPlayer.pile.slice(0, 3).filter((c) => {
-						if (cards.some((d) => c.cardInstance === d.cardInstance)) return false
+					const cards: Array<CardInstance> = modalResult.cards
+					const bottomCards: Array<CardInstance> = opponentPlayer.pile.slice(0, 3).filter((c) => {
+						if (cards.some((d) => c.instance === d.instance)) return false
 						return true
 					})
 

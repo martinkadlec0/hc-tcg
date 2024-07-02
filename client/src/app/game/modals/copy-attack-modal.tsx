@@ -2,11 +2,11 @@ import Modal from 'components/modal'
 import {useDispatch, useSelector} from 'react-redux'
 import css from './game-modals.module.scss'
 import {modalRequest} from 'logic/game/game-actions'
-import {HERMIT_CARDS} from 'common/cards'
 import Attack from './attack-modal/attack'
 import {getGameState} from 'logic/game/game-selectors'
 import {ModalData} from 'common/types/game-state'
 import {RowPos} from 'common/types/cards'
+import {isHermit} from 'common/cards/base/card'
 
 type Props = {
 	closeModal: () => void
@@ -20,9 +20,10 @@ function CopyAttackModal({closeModal}: Props) {
 
 	if (rowPos.rowIndex === null || !rowPos.row.hermitCard) return null
 
-	const opponentHermitInfo = HERMIT_CARDS[rowPos.row.hermitCard.cardId]
+	const opponentHermitInfo = rowPos.row.hermitCard
+	if (!isHermit(opponentHermitInfo.card.props)) return null
 
-	const hermitFullName = rowPos.row.hermitCard.cardId.split('_')[0]
+	const hermitFullName = rowPos.row.hermitCard.card.props.name
 
 	const handlePrimary = () => {
 		dispatch(modalRequest({modalResult: {pick: 'primary'}}))
@@ -46,16 +47,16 @@ function CopyAttackModal({closeModal}: Props) {
 				<div className={css.description}>
 					<Attack
 						key="primary"
-						name={opponentHermitInfo.primary.name}
+						name={opponentHermitInfo.card.props.primary.name}
 						icon={`/images/hermits-nobg/${hermitFullName}.png`}
-						attackInfo={opponentHermitInfo.primary}
+						attackInfo={opponentHermitInfo.card.props.primary}
 						onClick={handlePrimary}
 					/>
 					<Attack
 						key="secondary"
-						name={opponentHermitInfo.secondary.name}
+						name={opponentHermitInfo.card.props.secondary.name}
 						icon={`/images/hermits-nobg/${hermitFullName}.png`}
-						attackInfo={opponentHermitInfo.secondary}
+						attackInfo={opponentHermitInfo.card.props.secondary}
 						onClick={handleSecondary}
 					/>
 				</div>

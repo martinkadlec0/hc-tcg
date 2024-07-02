@@ -3,20 +3,9 @@ import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {slot} from '../../../slot'
 import {applySingleUse, getActiveRowPos} from '../../../utils/board'
-import SingleUseCard from '../../base/single-use-card'
+import Card, {SingleUse, singleUse} from '../../base/card'
 
-class BowSingleUseCard extends SingleUseCard {
-	constructor() {
-		super({
-			id: 'bow',
-			numericId: 3,
-			name: 'Bow',
-			rarity: 'common',
-			description: "Do 40hp damage to one of your opponent's AFK Hermits.",
-			log: null,
-		})
-	}
-
+class BowSingleUseCard extends Card {
 	pickCondition = slot.every(
 		slot.opponent,
 		slot.hermitSlot,
@@ -24,10 +13,21 @@ class BowSingleUseCard extends SingleUseCard {
 		slot.not(slot.activeRow)
 	)
 
-	override _attachCondition = slot.every(
-		super.attachCondition,
-		slot.someSlotFulfills(this.pickCondition)
-	)
+	props: SingleUse = {
+		...singleUse,
+		id: 'bow',
+		numericId: 3,
+		name: 'Bow',
+		expansion: 'default',
+		rarity: 'common',
+		tokens: 1,
+		description: "Do 40hp damage to one of your opponent's AFK Hermits.",
+		hasAttack: true,
+		attachCondition: slot.every(
+			singleUse.attachCondition,
+			slot.someSlotFulfills(this.pickCondition)
+		),
+	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
 		const {player, opponentPlayer} = pos
@@ -36,7 +36,7 @@ class BowSingleUseCard extends SingleUseCard {
 		player.hooks.getAttackRequests.add(instance, () => {
 			game.addPickRequest({
 				playerId: player.id,
-				id: this.id,
+				id: this.props.id,
 				message: "Pick one of your opponent's AFK Hermits",
 				canPick: this.pickCondition,
 				onResult(pickedSlot) {
@@ -71,7 +71,7 @@ class BowSingleUseCard extends SingleUseCard {
 				type: 'effect',
 				log: (values) =>
 					`${values.defaultLog} to attack ${values.target} for ${values.damage} damage`,
-			}).addDamage(this.id, 40)
+			}).addDamage(this.props.id, 40)
 
 			return bowAttack
 		})
@@ -92,10 +92,6 @@ class BowSingleUseCard extends SingleUseCard {
 
 		const targetKey = this.getInstanceKey(instance, 'target')
 		delete player.custom[targetKey]
-	}
-
-	override canAttack() {
-		return true
 	}
 }
 

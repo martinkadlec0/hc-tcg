@@ -1,37 +1,36 @@
-import SingleUseCard from '../../base/single-use-card'
-import {HERMIT_CARDS} from '../..'
 import {GameModel} from '../../../models/game-model'
 import {CardPosModel} from '../../../models/card-pos-model'
 import {applySingleUse} from '../../../utils/board'
 import {slot} from '../../../slot'
 import {healHermit} from '../../../types/game-state'
+import Card, {SingleUse, singleUse} from '../../base/card'
 
-class InstantHealthIISingleUseCard extends SingleUseCard {
-	constructor() {
-		super({
-			id: 'instant_health_ii',
-			numericId: 43,
-			name: 'Instant Health II',
-			rarity: 'rare',
-			description: 'Heal one of your Hermits 60hp.',
-			log: (values) => `${values.defaultLog} on $p${values.pick.name}$ and healed $g60hp$`,
-		})
-	}
-
+class InstantHealthIISingleUseCard extends Card {
 	pickCondition = slot.every(slot.hermitSlot, slot.not(slot.empty))
 
-	override _attachCondition = slot.every(
-		super.attachCondition,
-		slot.playerHasActiveHermit,
-		slot.someSlotFulfills(this.pickCondition)
-	)
+	props: SingleUse = {
+		...singleUse,
+		id: 'instant_health_ii',
+		numericId: 43,
+		name: 'Instant Health II',
+		expansion: 'default',
+		rarity: 'rare',
+		tokens: 2,
+		description: 'Heal one of your Hermits 60hp.',
+		attachCondition: slot.every(
+			singleUse.attachCondition,
+			slot.playerHasActiveHermit,
+			slot.someSlotFulfills(this.pickCondition)
+		),
+		log: (values) => `${values.defaultLog} on $p${values.pick.name}$ and healed $g60hp$`,
+	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
 		const {player} = pos
 
 		game.addPickRequest({
 			playerId: player.id,
-			id: this.id,
+			id: this.props.id,
 			message: 'Pick an active or AFK Hermit',
 			canPick: this.pickCondition,
 			onResult(pickedSlot) {

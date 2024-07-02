@@ -9,7 +9,7 @@ class PixlriffsRareHermitCard extends HermitCard {
 			numericId: 215,
 			name: 'Pixl',
 			rarity: 'rare',
-			hermitType: 'explorer',
+			type: 'explorer',
 			health: 290,
 			primary: {
 				name: 'Lore Keeper',

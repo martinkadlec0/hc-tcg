@@ -1,6 +1,5 @@
 import StatusEffect from './status-effect'
 import {GameModel} from '../models/game-model'
-import {HERMIT_CARDS} from '../cards'
 import {CardPosModel} from '../models/card-pos-model'
 import {removeStatusEffect} from '../utils/board'
 import {StatusEffectT} from '../types/game-state'
@@ -23,17 +22,17 @@ class SleepingStatusEffect extends StatusEffect {
 	override onApply(game: GameModel, statusEffectInfo: StatusEffectT, pos: CardPosModel) {
 		const {player, card, row, rowIndex} = pos
 
-		if (!card || !row?.hermitCard || rowIndex === null) return
+		if (!card || !row?.hermitCard || rowIndex === null || !card.card.isHealth()) return
 
 		game.state.statusEffects.push(statusEffectInfo)
 		game.addBlockedActions(this.id, 'PRIMARY_ATTACK', 'SECONDARY_ATTACK', 'CHANGE_ACTIVE_HERMIT')
 		if (!statusEffectInfo.duration) statusEffectInfo.duration = this.duration
 
-		row.health = HERMIT_CARDS[card.cardId].health
+		row.health = card.card.props.health
 
 		game.battleLog.addEntry(
 			player.id,
-			`$p${HERMIT_CARDS[card.cardId].name}$ went to $eSleep$ and restored $gfull health$`
+			`$p${card.props.name}$ went to $eSleep$ and restored $gfull health$`
 		)
 
 		player.hooks.onTurnStart.add(statusEffectInfo.statusEffectInstance, () => {
@@ -58,7 +57,7 @@ class SleepingStatusEffect extends StatusEffect {
 		player.hooks.afterDefence.add(statusEffectInfo.statusEffectInstance, (attack) => {
 			const attackTarget = attack.getTarget()
 			if (!attackTarget) return
-			if (attackTarget.row.hermitCard.cardInstance !== statusEffectInfo.targetInstance) return
+			if (attackTarget.row.hermitCard.instance !== statusEffectInfo.targetInstance) return
 			if (attackTarget.row.health > 0) return
 			removeStatusEffect(game, pos, statusEffectInfo.statusEffectInstance)
 		})

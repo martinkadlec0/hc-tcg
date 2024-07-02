@@ -4,21 +4,21 @@ import {GameModel} from '../../../models/game-model'
 import {slot} from '../../../slot'
 import {executeExtraAttacks} from '../../../utils/attacks'
 import {getActiveRowPos} from '../../../utils/board'
-import EffectCard from '../../base/effect-card'
+import Card, {Attach, attach} from '../../base/card'
 
-class WolfEffectCard extends EffectCard {
-	constructor() {
-		super({
-			id: 'wolf',
-			numericId: 108,
-			name: 'Wolf',
-			rarity: 'rare',
-			description:
-				"Attach to your active Hermit.\nIf any of your Hermits take damage on your opponent's turn, your opponent's active Hermit takes 20hp damage for each Wolf card you have on the game board.",
-		})
+class WolfEffectCard extends Card {
+	props: Attach = {
+		...attach,
+		id: 'wolf',
+		numericId: 108,
+		name: 'Wolf',
+		expansion: 'default',
+		rarity: 'rare',
+		tokens: 1,
+		description:
+			"Attach to your active Hermit.\nIf any of your Hermits take damage on your opponent's turn, your opponent's active Hermit takes 20hp damage for each Wolf card you have on the game board.",
+		attachCondition: slot.every(attach.attachCondition, slot.activeRow),
 	}
-
-	override _attachCondition = slot.every(super.attachCondition, slot.activeRow)
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
 		const {player, opponentPlayer} = pos
@@ -57,7 +57,7 @@ class WolfEffectCard extends EffectCard {
 				type: 'effect',
 				isBacklash: true,
 				log: (values) => `${values.target} took ${values.damage} damage from $eWolf$`,
-			}).addDamage(this.id, 20)
+			}).addDamage(this.props.id, 20)
 
 			executeExtraAttacks(game, [backlashAttack])
 		})

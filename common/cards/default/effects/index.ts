@@ -10,9 +10,9 @@ import ThornsEffectCard from './thorns'
 import LoyaltyEffectCard from './loyalty'
 import WaterBucketEffectCard from './water-bucket'
 import MilkBucketEffectCard from './milk-bucket'
-import EffectCard from '../../base/effect-card'
+import Card from '../../base/card'
 
-const effectCardClasses: Array<EffectCard> = [
+const effectCardClasses: Array<Card> = [
 	new BedEffectCard(),
 	new WolfEffectCard(),
 	new GoldArmorEffectCard(),

@@ -3,19 +3,21 @@ import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {slot} from '../../../slot'
 import {executeExtraAttacks, isTargetingPos} from '../../../utils/attacks'
-import EffectCard from '../../base/effect-card'
+import Card, {Attach, attach} from '../../base/card'
 
-class ThornsIIEffectCard extends EffectCard {
-	constructor() {
-		super({
-			id: 'thorns_ii',
-			numericId: 123,
-			name: 'Thorns II',
-			rarity: 'rare',
-			description:
-				"When the Hermit this card is attached to takes damage, your opponent's active Hermit takes 30hp damage.\nIgnores armour.",
-		})
+class ThornsIIEffectCard extends Card {
+	props: Attach = {
+		...attach,
+		id: 'thorns_ii',
+		numericId: 123,
+		name: 'Thorns II',
+		expansion: 'alter_egos',
+		rarity: 'rare',
+		tokens: 3,
+		description:
+			"When the Hermit this card is attached to takes damage, your opponent's active Hermit takes 30hp damage.\nIgnores armour.",
 	}
+
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
 		const {player, opponentPlayer} = pos
 		const triggeredKey = this.getInstanceKey(instance, 'triggered')
@@ -40,7 +42,7 @@ class ThornsIIEffectCard extends EffectCard {
 				type: 'effect',
 				isBacklash: true,
 				log: (values) => `${values.target} took ${values.damage} damage from $eThorns II$`,
-			}).addDamage(this.id, 30)
+			}).addDamage(this.props.id, 30)
 
 			backlashAttack.shouldIgnoreSlots.push(
 				slot.hasId('gold_armor', 'iron_armor', 'diamond_armor', 'netherite_armor')
@@ -60,10 +62,6 @@ class ThornsIIEffectCard extends EffectCard {
 		opponentPlayer.hooks.afterAttack.remove(instance)
 		opponentPlayer.hooks.onTurnEnd.remove(instance)
 		delete player.custom[triggeredKey]
-	}
-
-	override getExpansion() {
-		return 'alter_egos'
 	}
 }
 

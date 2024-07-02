@@ -21,7 +21,7 @@ class CatEffectCard extends EffectCard {
 			if (!pos.row || !pos.row.hermitCard) return
 			if (
 				attack.id !==
-				HERMIT_CARDS[pos.row.hermitCard.cardId].getInstanceKey(pos.row.hermitCard.cardInstance)
+				HERMIT_CARDS[pos.row.hermitCard.cardId].getInstanceKey(pos.row.hermitCard.instance)
 			)
 				return
 

@@ -2,20 +2,9 @@ import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {slot} from '../../../slot'
 import {applySingleUse} from '../../../utils/board'
-import SingleUseCard from '../../base/single-use-card'
+import Card, {SingleUse, singleUse} from '../../base/card'
 
-class TargetBlockSingleUseCard extends SingleUseCard {
-	constructor() {
-		super({
-			id: 'target_block',
-			numericId: 149,
-			name: 'Target Block',
-			rarity: 'rare',
-			description:
-				"Choose one of your opponent's AFK Hermits to take all damage done during this turn.",
-		})
-	}
-
+class TargetBlockSingleUseCard extends Card {
 	pickCondition = slot.every(
 		slot.opponent,
 		slot.hermitSlot,
@@ -23,10 +12,21 @@ class TargetBlockSingleUseCard extends SingleUseCard {
 		slot.not(slot.empty)
 	)
 
-	override _attachCondition = slot.every(
-		super.attachCondition,
-		slot.someSlotFulfills(this.pickCondition)
-	)
+	props: SingleUse = {
+		...singleUse,
+		id: 'target_block',
+		numericId: 149,
+		name: 'Target Block',
+		expansion: 'alter_egos',
+		rarity: 'rare',
+		tokens: 3,
+		description:
+			"Choose one of your opponent's AFK Hermits to take all damage done during this turn.",
+		attachCondition: slot.every(
+			singleUse.attachCondition,
+			slot.someSlotFulfills(this.pickCondition)
+		),
+	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
 		const {player, opponentPlayer} = pos
@@ -34,7 +34,7 @@ class TargetBlockSingleUseCard extends SingleUseCard {
 
 		game.addPickRequest({
 			playerId: player.id,
-			id: this.id,
+			id: this.props.id,
 			message: "Pick one of your opponent's AFK Hermits",
 			canPick: this.pickCondition,
 			onResult(pickedSlot) {
@@ -66,10 +66,6 @@ class TargetBlockSingleUseCard extends SingleUseCard {
 			opponentPlayer.hooks.onDefence.remove(instance)
 			delete player.custom[ignoreThisWeakness]
 		})
-	}
-
-	override getExpansion() {
-		return 'alter_egos'
 	}
 }
 

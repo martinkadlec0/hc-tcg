@@ -1,18 +1,19 @@
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {isTargetingPos} from '../../../utils/attacks'
-import EffectCard from '../../base/effect-card'
+import Card, {Attach, attach} from '../../base/card'
 
-class NetheriteArmorEffectCard extends EffectCard {
-	constructor() {
-		super({
-			id: 'netherite_armor',
-			numericId: 82,
-			name: 'Netherite Armour',
-			rarity: 'ultra_rare',
-			description:
-				'When the Hermit this card is attached to takes damage, that damage is reduced by up to 40hp each turn.',
-		})
+class NetheriteArmorEffectCard extends Card {
+	props: Attach = {
+		...attach,
+		id: 'netherite_armor',
+		numericId: 82,
+		name: 'Netherite Armour',
+		expansion: 'default',
+		rarity: 'ultra_rare',
+		tokens: 4,
+		description:
+			'When the Hermit this card is attached to takes damage, that damage is reduced by up to 40hp each turn.',
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
@@ -31,7 +32,7 @@ class NetheriteArmorEffectCard extends EffectCard {
 			if (totalReduction < 40) {
 				const damageReduction = Math.min(attack.calculateDamage(), 40 - totalReduction)
 				player.custom[instanceKey] += damageReduction
-				attack.reduceDamage(this.id, damageReduction)
+				attack.reduceDamage(this.props.id, damageReduction)
 			}
 		})
 

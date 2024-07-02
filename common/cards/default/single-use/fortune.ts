@@ -1,21 +1,19 @@
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
-import SingleUseCard from '../../base/single-use-card'
+import Card, {SingleUse, singleUse} from '../../base/card'
 
 // We could stop displaying the coin flips but I think it may confuse players when Zedaph or Pearl uses fortune.
-class FortuneSingleUseCard extends SingleUseCard {
-	constructor() {
-		super({
-			id: 'fortune',
-			numericId: 26,
-			name: 'Fortune',
-			rarity: 'ultra_rare',
-			description: 'Any coin flips on this turn are not required, as "heads" is assumed.',
-		})
-	}
-
-	override canApply() {
-		return true
+class FortuneSingleUseCard extends Card {
+	props: SingleUse = {
+		...singleUse,
+		id: 'fortune',
+		numericId: 26,
+		name: 'Fortune',
+		expansion: 'default',
+		rarity: 'ultra_rare',
+		tokens: 1,
+		description: 'Any coin flips on this turn are not required, as "heads" is assumed.',
+		showConfirmationModal: true,
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {

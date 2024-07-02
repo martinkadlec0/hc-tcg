@@ -1,33 +1,35 @@
-import {CARDS} from '../..'
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {flipCoin} from '../../../utils/coinFlips'
-import {moveCardToHand} from '../../../utils/movement'
-import HermitCard from '../../base/hermit-card'
+import {moveCardInstanceoHand} from '../../../utils/movement'
+import Card, {Hermit, hermit} from '../../base/card'
 
-class HelsknightRareHermitCard extends HermitCard {
-	constructor() {
-		super({
-			id: 'helsknight_rare',
-			numericId: 130,
-			name: 'Helsknight',
-			rarity: 'rare',
-			hermitType: 'pvp',
-			health: 270,
-			primary: {
-				name: 'Pitiful',
-				cost: ['any'],
-				damage: 40,
-				power: null,
-			},
-			secondary: {
-				name: 'Trap Hole',
-				cost: ['pvp', 'pvp', 'pvp'],
-				damage: 100,
-				power:
-					'If your opponent uses a single use effect card on their next turn, flip a coin.\nIf heads, you take that card after its effect is applied and add it to your hand.',
-			},
-		})
+class HelsknightRareHermitCard extends Card {
+	props: Hermit = {
+		...hermit,
+		id: 'helsknight_rare',
+		numericId: 130,
+		name: 'Helsknight',
+		expansion: 'alter_egos',
+		palette: 'alter_egos',
+		background: 'alter_egos',
+		rarity: 'rare',
+		tokens: 2,
+		type: 'pvp',
+		health: 270,
+		primary: {
+			name: 'Pitiful',
+			cost: ['any'],
+			damage: 40,
+			power: null,
+		},
+		secondary: {
+			name: 'Trap Hole',
+			cost: ['pvp', 'pvp', 'pvp'],
+			damage: 100,
+			power:
+				'If your opponent uses a single use effect card on their next turn, flip a coin.\nIf heads, you take that card after its effect is applied and add it to your hand.',
+		},
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
@@ -44,14 +46,13 @@ class HelsknightRareHermitCard extends HermitCard {
 				const coinFlip = flipCoin(player, attackerHermit, 1, opponentPlayer)
 
 				if (coinFlip[0] == 'heads') {
-					const cardInfo = CARDS[opponentPlayer.board.singleUseCard.cardId]
-					moveCardToHand(game, opponentPlayer.board.singleUseCard, player)
+					moveCardInstanceoHand(game, opponentPlayer.board.singleUseCard, player)
 
 					opponentPlayer.board.singleUseCardUsed = false
 
 					game.battleLog.addEntry(
 						player.id,
-						`$p{Helsknight}$ flipped $pheads$ and took $e${cardInfo.name}$`
+						`$p{Helsknight}$ flipped $pheads$ and took $e${opponentPlayer.board.singleUseCard.props.name}$`
 					)
 				} else {
 					game.battleLog.addEntry(player.id, `$p{Helsknight}$ flipped $btails$b`)
@@ -68,18 +69,6 @@ class HelsknightRareHermitCard extends HermitCard {
 	override onDetach(game: GameModel, instance: string, pos: CardPosModel) {
 		const {player} = pos
 		player.hooks.onAttack.remove(instance)
-	}
-
-	override getExpansion() {
-		return 'alter_egos'
-	}
-
-	override getPalette() {
-		return 'alter_egos'
-	}
-
-	override getBackground() {
-		return 'alter_egos_background'
 	}
 }
 

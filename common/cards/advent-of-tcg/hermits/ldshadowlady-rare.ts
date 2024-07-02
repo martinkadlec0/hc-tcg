@@ -10,7 +10,7 @@ class LDShadowLadyRareHermitCard extends HermitCard {
 			numericId: 211,
 			name: 'Lizzie',
 			rarity: 'rare',
-			hermitType: 'terraform',
+			type: 'terraform',
 			health: 290,
 			primary: {
 				name: 'Fairy Fort',

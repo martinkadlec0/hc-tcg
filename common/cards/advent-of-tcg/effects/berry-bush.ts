@@ -1,20 +1,28 @@
-import EffectCard from '../../base/effect-card'
 import {GameModel} from '../../../models/game-model'
 import {discardCard} from '../../../utils/movement'
 import {CardPosModel} from '../../../models/card-pos-model'
 import {getActiveRow} from '../../../utils/board'
 import {slot} from '../../../slot'
+import Card, {Attach, attach} from '../../base/card'
 
-class BerryBushEffectCard extends EffectCard {
-	constructor() {
-		super({
-			id: 'berry_bush',
-			numericId: 200,
-			name: 'Sweet Berry Bush',
-			rarity: 'ultra_rare',
-			description:
-				"Use like a Hermit card. Place on one of your opponent's empty Hermit slots. Has 30hp.\nCan not attach cards to it.\nYou do not get a point when it's knocked out.\nLoses 10hp per turn. If you knock out Sweet Berry Bush before it's HP becomes 0, add 2 Instant Healing II into your hand.",
-		})
+class BerryBushEffectCard extends Card<Attach> {
+	props: Attach = {
+		...attach,
+		id: 'berry_bush',
+		numericId: 200,
+		name: 'Sweet Berry Bush',
+		expansion: 'advent_of_tcg',
+		rarity: 'ultra_rare',
+		tokens: 2,
+		description:
+			"Use like a Hermit card. Place on one of your opponent's empty Hermit slots. Has 30hp.\nCan not attach cards to it.\nYou do not get a point when it's knocked out.\nLoses 10hp per turn. If you knock out Sweet Berry Bush before it's HP becomes 0, add 2 Instant Healing II into your hand.",
+		attachCondition: slot.every(
+			slot.opponent,
+			slot.hermitSlot,
+			slot.empty,
+			slot.playerHasActiveHermit,
+			slot.opponentHasActiveHermit
+		),
 	}
 
 	override _attachCondition = slot.every(
@@ -77,10 +85,6 @@ class BerryBushEffectCard extends EffectCard {
 		player.hooks.afterAttack.remove(instance)
 		opponentPlayer.hooks.afterAttack.remove(instance)
 		opponentPlayer.hooks.onTurnEnd.remove(instance)
-	}
-
-	override getExpansion() {
-		return 'advent_of_tcg'
 	}
 
 	override showAttachTooltip() {

@@ -1,14 +1,14 @@
 import classnames from 'classnames'
-import HermitCard from '../../../../common/cards/base/hermit-card'
 import css from './hermit-card-svg.module.scss'
 import {useSelector} from 'react-redux'
 import {getGameState} from 'logic/game/game-selectors'
 import {getCardRank} from 'common/utils/ranks'
 import {EXPANSIONS} from 'common/config'
 import {memo} from 'react'
+import {Hermit, WithoutFunctions} from 'common/cards/base/card'
 
 export type HermitCardProps = {
-	card: HermitCard
+	card: WithoutFunctions<Hermit>
 }
 
 const COST_PAD = 20
@@ -22,13 +22,13 @@ const COST_X = [
 const HermitCardModule = memo(({card}: HermitCardProps) => {
 	const hermitFullName = card.id.split('_')[0]
 
-	const rank = getCardRank(card.id)
-	const palette = card.getPalette()
-	const backgroundName = card.getBackground()
+	const rank = getCardRank(card.tokens)
+	const palette = card.palette || ''
+	const backgroundName = card.background || hermitFullName
 	const showCost = !useSelector(getGameState)
-	const name = card.getShortName()
+	const name = card.shortName || card.name
 	const nameLength = name.length
-	const disabled = EXPANSIONS.disabled.includes(card.getExpansion()) ? 'disabled' : 'enabled'
+	const disabled = EXPANSIONS.disabled.includes(card.expansion) ? 'disabled' : 'enabled'
 
 	return (
 		<svg
@@ -92,7 +92,7 @@ const HermitCardModule = memo(({card}: HermitCardProps) => {
 			</g>
 			<g id="hermit-type">
 				<rect
-					className={css.hermitTypeBackground}
+					className={css.typeBackground}
 					x="315"
 					y="-5"
 					width="100"
@@ -105,18 +105,18 @@ const HermitCardModule = memo(({card}: HermitCardProps) => {
 					y="12"
 					width="68"
 					height="68"
-					href={`/images/types/type-${card.hermitType}.png`}
-					className={css.hermitType}
+					href={`/images/types/type-${card.type}.png`}
+					className={css.type}
 				/>
 			</g>
-			{showCost && rank.name !== 'stone' ? (
+			{showCost && rank !== 'stone' ? (
 				<g>
 					<image
 						x="68"
 						y="80"
 						width="70"
 						height="70"
-						href={`/images/ranks/${rank.name}.png`}
+						href={`/images/ranks/${rank}.png`}
 						className={css.rank}
 					/>
 				</g>

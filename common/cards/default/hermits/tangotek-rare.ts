@@ -1,31 +1,32 @@
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {slot} from '../../../slot'
-import HermitCard from '../../base/hermit-card'
+import Card, {Hermit, hermit} from '../../base/card'
 
-class TangoTekRareHermitCard extends HermitCard {
-	constructor() {
-		super({
-			id: 'tangotek_rare',
-			numericId: 95,
-			name: 'Tango',
-			rarity: 'rare',
-			hermitType: 'farm',
-			health: 290,
-			primary: {
-				name: 'Skadoodle',
-				cost: ['farm'],
-				damage: 50,
-				power: null,
-			},
-			secondary: {
-				name: 'Extra Flee',
-				cost: ['farm', 'farm', 'farm'],
-				damage: 100,
-				power:
-					'After your attack, both players must choose an AFK Hermit to set as their active Hermit, unless they have no AFK Hermits.\nYour opponent chooses their active Hermit first.',
-			},
-		})
+class TangoTekRareHermitCard extends Card {
+	props: Hermit = {
+		...hermit,
+		id: 'tangotek_rare',
+		numericId: 95,
+		name: 'Tango',
+		expansion: 'default',
+		rarity: 'rare',
+		tokens: 1,
+		type: 'farm',
+		health: 290,
+		primary: {
+			name: 'Skadoodle',
+			cost: ['farm'],
+			damage: 50,
+			power: null,
+		},
+		secondary: {
+			name: 'Extra Flee',
+			cost: ['farm', 'farm', 'farm'],
+			damage: 100,
+			power:
+				'After your attack, both players must choose an AFK Hermit to set as their active Hermit, unless they have no AFK Hermits.\nYour opponent chooses their active Hermit first.',
+		},
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
@@ -59,7 +60,7 @@ class TangoTekRareHermitCard extends HermitCard {
 			if (game.someSlotFulfills(opponentInactiveRowsPickCondition)) {
 				game.addPickRequest({
 					playerId: opponentPlayer.id,
-					id: this.id,
+					id: this.props.id,
 					message: 'Pick a new active Hermit from your afk hermits',
 					canPick: opponentInactiveRowsPickCondition,
 					onResult(pickedSlot) {
@@ -85,7 +86,7 @@ class TangoTekRareHermitCard extends HermitCard {
 			) {
 				game.addPickRequest({
 					playerId: player.id,
-					id: this.id,
+					id: this.props.id,
 					message: 'Pick a new active Hermit from your afk hermits',
 					canPick: playerInactiveRowsPickCondition,
 					onResult(pickedSlot) {

@@ -1,31 +1,38 @@
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {flipCoin} from '../../../utils/coinFlips'
-import HermitCard from '../../base/hermit-card'
+import Card, {Hermit, hermit} from '../../base/card'
 
-class PearlescentMoonRareHermitCard extends HermitCard {
-	constructor() {
-		super({
-			id: 'pearlescentmoon_rare',
-			numericId: 85,
-			name: 'Pearl',
-			rarity: 'rare',
-			hermitType: 'terraform',
-			health: 300,
-			primary: {
-				name: 'Cleaning Lady',
-				cost: ['terraform'],
-				damage: 60,
-				power: null,
+class PearlescentMoonRareHermitCard extends Card {
+	props: Hermit = {
+		...hermit,
+		id: 'pearlescentmoon_rare',
+		numericId: 85,
+		name: 'Pearl',
+		expansion: 'default',
+		rarity: 'rare',
+		tokens: 2,
+		type: 'terraform',
+		health: 300,
+		primary: {
+			name: 'Cleaning Lady',
+			cost: ['terraform'],
+			damage: 60,
+			power: null,
+		},
+		secondary: {
+			name: 'Aussie Ping',
+			cost: ['terraform', 'any'],
+			damage: 70,
+			power:
+				'If your opponent attacks on their next turn, flip a coin.\nIf heads, their attack misses. Your opponent can not miss due to this ability on consecutive turns.',
+		},
+		sidebarDescriptions: [
+			{
+				type: 'glossary',
+				name: 'missed',
 			},
-			secondary: {
-				name: 'Aussie Ping',
-				cost: ['terraform', 'any'],
-				damage: 70,
-				power:
-					'If your opponent attacks on their next turn, flip a coin.\nIf heads, their attack misses. Your opponent can not miss due to this ability on consecutive turns.',
-			},
-		})
+		],
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
@@ -56,7 +63,7 @@ class PearlescentMoonRareHermitCard extends HermitCard {
 				}
 
 				if (player.custom[status] === 'heads') {
-					attack.multiplyDamage(this.id, 0).lockDamage(this.id)
+					attack.multiplyDamage(this.props.id, 0).lockDamage(this.props.id)
 				}
 			})
 
@@ -84,15 +91,6 @@ class PearlescentMoonRareHermitCard extends HermitCard {
 		opponentPlayer.hooks.beforeAttack.remove(instance)
 		opponentPlayer.hooks.onTurnEnd.remove(instance)
 		delete player.custom[this.getInstanceKey(instance, 'status')]
-	}
-
-	override sidebarDescriptions() {
-		return [
-			{
-				type: 'glossary',
-				name: 'missed',
-			},
-		]
 	}
 }
 

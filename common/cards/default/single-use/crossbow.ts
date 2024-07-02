@@ -5,18 +5,19 @@ import {slot} from '../../../slot'
 import {SlotInfo} from '../../../types/cards'
 import {PickRequest} from '../../../types/server-requests'
 import {applySingleUse, getActiveRowPos} from '../../../utils/board'
-import SingleUseCard from '../../base/single-use-card'
+import Card, {SingleUse, singleUse} from '../../base/card'
 
-class CrossbowSingleUseCard extends SingleUseCard {
-	constructor() {
-		super({
-			id: 'crossbow',
-			numericId: 8,
-			name: 'Crossbow',
-			rarity: 'rare',
-			description: "Do 20hp damage to up to 3 of your opponent's active or AFK Hermits.",
-			log: null,
-		})
+class CrossbowSingleUseCard extends Card {
+	props: SingleUse = {
+		...singleUse,
+		id: 'crossbow',
+		numericId: 8,
+		name: 'Crossbow',
+		expansion: 'default',
+		rarity: 'rare',
+		tokens: 1,
+		description: "Do 20hp damage to up to 3 of your opponent's active or AFK Hermits.",
+		hasAttack: true,
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
@@ -33,7 +34,7 @@ class CrossbowSingleUseCard extends SingleUseCard {
 
 			const pickRequest = {
 				playerId: player.id,
-				id: this.id,
+				id: this.props.id,
 				onResult(pickedSlot: SlotInfo) {
 					const rowIndex = pickedSlot.rowIndex
 					if (!pickedSlot.card || rowIndex === null) return
@@ -97,7 +98,7 @@ class CrossbowSingleUseCard extends SingleUseCard {
 						i === 0
 							? `${values.defaultLog} to attack ${values.target} for ${values.damage} damage`
 							: `, ${values.target} for ${values.damage} damage`,
-				}).addDamage(this.id, 20)
+				}).addDamage(this.props.id, 20)
 
 				if (r) return r.addNewAttack(newAttack)
 
@@ -130,10 +131,6 @@ class CrossbowSingleUseCard extends SingleUseCard {
 		const remainingKey = this.getInstanceKey(instance, 'remaining')
 		delete player.custom[targetsKey]
 		delete player.custom[remainingKey]
-	}
-
-	override canAttack() {
-		return true
 	}
 }
 

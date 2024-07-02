@@ -12,7 +12,7 @@ class DungeonTangoRareHermitCard extends HermitCard {
 			numericId: 208,
 			name: 'DM tango',
 			rarity: 'rare',
-			hermitType: 'miner',
+			type: 'miner',
 			health: 280,
 			primary: {
 				name: 'Lackey',

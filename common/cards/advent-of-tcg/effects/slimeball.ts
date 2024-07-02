@@ -18,7 +18,7 @@ class SlimeballEffectCard extends EffectCard {
 
 	override _attachCondition = slot.every(
 		slot.opponent,
-		slot.effectSlot,
+		slot.attachSlot,
 		slot.empty,
 		slot.rowHasHermit,
 		slot.actionAvailable('PLAY_EFFECT_CARD'),
@@ -32,7 +32,7 @@ class SlimeballEffectCard extends EffectCard {
 			return slot.every(
 				slot.player,
 				slot.rowIndex(pos.rowIndex),
-				slot.not(slot.effectSlot),
+				slot.not(slot.attachSlot),
 				slot.not(slot.empty)
 			)
 		})

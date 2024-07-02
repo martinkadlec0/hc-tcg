@@ -10,7 +10,7 @@ class Biffa2001RareHermitCard extends HermitCard {
 			numericId: 206,
 			name: 'Biffa',
 			rarity: 'rare',
-			hermitType: 'miner',
+			type: 'miner',
 			health: 290,
 			primary: {
 				name: 'O.H.O',

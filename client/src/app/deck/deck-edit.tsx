@@ -5,10 +5,8 @@ import {sortCards, cardGroupHeader} from './deck'
 import css from './deck.module.scss'
 import DeckLayout from './layout'
 import {CARDS} from 'common/cards'
-import HermitCard from 'common/cards/base/hermit-card'
-import ItemCard from 'common/cards/base/item-card'
-import Card from 'common/cards/base/card'
-import {CardT} from 'common/types/game-state'
+import Card, {WithoutFunctions} from 'common/cards/base/card'
+import {LocalCardInstance} from 'common/types/server-requests'
 import {PlayerDeckT} from 'common/types/deck'
 import CardList from 'components/card-list'
 import Accordion from 'components/accordion'
@@ -16,15 +14,14 @@ import Button from 'components/button'
 import errorIcon from 'components/svgs/errorIcon'
 import Dropdown from 'components/dropdown'
 import AlertModal from 'components/alert-modal'
-import {CONFIG, RANKS, EXPANSIONS} from '../../../../common/config'
+import {CONFIG, EXPANSIONS} from '../../../../common/config'
 import {deleteDeck, getSavedDeckNames} from 'logic/saved-decks/saved-decks'
-import {getCardExpansion} from 'common/utils/cards'
-import {getCardRank, getDeckCost} from 'common/utils/ranks'
+import {getDeckCost} from 'common/utils/ranks'
 import {validateDeck} from 'common/utils/validation'
 import {getSettings} from 'logic/local-settings/local-settings-selectors'
 import {setSetting} from 'logic/local-settings/local-settings-actions'
 
-const RANK_NAMES = ['any', ...Object.keys(RANKS.ranks)]
+const RANK_NAMES = ['any', 'stone', 'iron', 'gold', 'emerald', 'diamond']
 const DECK_ICONS = [
 	'any',
 	'balanced',
@@ -43,7 +40,7 @@ const EXPANSION_NAMES = [
 	'any',
 	...Object.keys(EXPANSIONS.expansions).filter((expansion) => {
 		return Object.values(CARDS).some(
-			(card) => card.getExpansion() === expansion && !EXPANSIONS.disabled.includes(expansion)
+			(card) => card.props.expansion === expansion && !EXPANSIONS.disabled.includes(expansion)
 		)
 	}),
 ]
@@ -132,54 +129,47 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 
 	//MISC
 	const initialDeckState = deck
-	const TYPED_CARDS = CARDS as Record<string, Card>
-	const HTYPE_CARDS = CARDS as Record<string, HermitCard | ItemCard>
-	const allCards = Object.values(TYPED_CARDS).map(
-		(card: Card): CardT => ({
-			cardId: card.id,
-			cardInstance: card.id,
+	const allCards = Object.values(CARDS).map(
+		(card: Card): LocalCardInstance => ({
+			props: WithoutFunctions(card.props),
+			instance: card.props.id,
 		})
 	)
-	const filteredCards: CardT[] = allCards.filter(
+	const filteredCards: LocalCardInstance[] = allCards.filter(
 		(card) =>
 			// Card Name Filter
-			TYPED_CARDS[card.cardId].name.toLowerCase().includes(deferredTextQuery.toLowerCase()) &&
+			card.props.name.toLowerCase().includes(deferredTextQuery.toLowerCase()) &&
 			// Card Type Filter
-			(HTYPE_CARDS[card.cardId].hermitType === undefined
-				? TYPED_CARDS[card.cardId]
-				: HTYPE_CARDS[card.cardId].hermitType.includes(typeQuery)) &&
+			card.props.category.includes(typeQuery) &&
 			// Card Rarity Filter
-			(rankQuery === '' || getCardRank(card.cardId).name === rankQuery) &&
+			(rankQuery === '' || card.props.rarity === rankQuery) &&
 			// Card Expansion Filter
-			(expansionQuery === '' || getCardExpansion(card.cardId) === expansionQuery) &&
+			(expansionQuery === '' || card.props.expansion === expansionQuery) &&
 			// Don't show disabled cards
-			!EXPANSIONS.disabled.includes(getCardExpansion(card.cardId))
+			!EXPANSIONS.disabled.includes(card.props.expansion)
 	)
+
 	const selectedCards = {
-		hermits: loadedDeck.cards.filter((card) => TYPED_CARDS[card.cardId].type === 'hermit'),
-		items: loadedDeck.cards.filter((card) => TYPED_CARDS[card.cardId].type === 'item'),
-		attachableEffects: loadedDeck.cards.filter(
-			(card) => TYPED_CARDS[card.cardId].type === 'effect'
-		),
-		singleUseEffects: loadedDeck.cards.filter(
-			(card) => TYPED_CARDS[card.cardId].type === 'single_use'
-		),
+		hermits: loadedDeck.cards.filter((card) => card.props.category === 'hermit'),
+		items: loadedDeck.cards.filter((card) => card.props.category === 'item'),
+		attachableEffects: loadedDeck.cards.filter((card) => card.props.category === 'attach'),
+		singleUseEffects: loadedDeck.cards.filter((card) => card.props.category === 'single_use'),
 	}
 
 	//CARD LOGIC
 	const clearDeck = () => {
 		setLoadedDeck({...loadedDeck, cards: []})
 	}
-	const addCard = (card: CardT) => {
+	const addCard = (card: LocalCardInstance) => {
 		setLoadedDeck((loadedDeck) => ({
 			...loadedDeck,
-			cards: [...loadedDeck.cards, {cardId: card.cardId, cardInstance: Math.random().toString()}],
+			cards: [...loadedDeck.cards, {props: card.props, instance: Math.random().toString()}],
 		}))
 	}
-	const removeCard = (card: CardT) => {
+	const removeCard = (card: LocalCardInstance) => {
 		setLoadedDeck((loadedDeck) => ({
 			...loadedDeck,
-			cards: loadedDeck.cards.filter((pickedCard) => pickedCard.cardInstance !== card.cardInstance),
+			cards: loadedDeck.cards.filter((pickedCard) => pickedCard.instance !== card.instance),
 		}))
 	}
 
@@ -242,7 +232,7 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 		})
 		back()
 	}
-	const validationMessage = validateDeck(loadedDeck.cards.map((card) => card.cardId))
+	const validationMessage = validateDeck(loadedDeck.cards)
 
 	return (
 		<>
@@ -348,9 +338,7 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 				>
 					<Accordion header={'Hermits'}>
 						<CardList
-							cards={sortCards(filteredCards).filter(
-								(card) => TYPED_CARDS[card.cardId].type === 'hermit'
-							)}
+							cards={sortCards(filteredCards).filter((card) => card.props.category === 'hermit')}
 							enableAnimations={false}
 							wrap={true}
 							onClick={addCard}
@@ -358,9 +346,7 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 					</Accordion>
 					<Accordion header={'Attachable Effects'}>
 						<CardList
-							cards={sortCards(filteredCards).filter(
-								(card) => TYPED_CARDS[card.cardId].type === 'effect'
-							)}
+							cards={sortCards(filteredCards).filter((card) => card.props.category === 'attach')}
 							enableAnimations={false}
 							wrap={true}
 							onClick={addCard}
@@ -369,7 +355,7 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 					<Accordion header={'Single Use Effects'}>
 						<CardList
 							cards={sortCards(filteredCards).filter(
-								(card) => TYPED_CARDS[card.cardId].type === 'single_use'
+								(card) => card.props.category === 'single_use'
 							)}
 							enableAnimations={false}
 							wrap={true}
@@ -378,9 +364,7 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 					</Accordion>
 					<Accordion header={'Items'}>
 						<CardList
-							cards={sortCards(filteredCards).filter(
-								(card) => TYPED_CARDS[card.cardId].type === 'item'
-							)}
+							cards={sortCards(filteredCards).filter((card) => card.props.category === 'item')}
 							enableAnimations={false}
 							wrap={true}
 							onClick={addCard}
@@ -399,8 +383,8 @@ function EditDeck({back, title, saveDeck, deck}: Props) {
 									<span className={css.hideOnMobile}>cards</span>
 								</p>
 								<div className={classNames(css.cardCount, css.dark, css.tokens)}>
-									{getDeckCost(loadedDeck.cards.map((card) => card.cardId))}/
-									{CONFIG.limits.maxDeckCost} <span className={css.hideOnMobile}>tokens</span>
+									{getDeckCost(loadedDeck.cards)}/{CONFIG.limits.maxDeckCost}{' '}
+									<span className={css.hideOnMobile}>tokens</span>
 								</div>
 							</div>
 						</>

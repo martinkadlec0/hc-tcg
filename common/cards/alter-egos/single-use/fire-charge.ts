@@ -1,42 +1,42 @@
-import SingleUseCard from '../../base/single-use-card'
 import {GameModel} from '../../../models/game-model'
 import {CardPosModel} from '../../../models/card-pos-model'
 import {discardCard, discardSingleUse} from '../../../utils/movement'
 import {applySingleUse} from '../../../utils/board'
 import {getFormattedName} from '../../../utils/game'
 import {slot} from '../../../slot'
+import Card, {SingleUse, singleUse} from '../../base/card'
 
-class FireChargeSingleUseCard extends SingleUseCard {
-	constructor() {
-		super({
-			id: 'fire_charge',
-			numericId: 142,
-			name: 'Fire Charge',
-			rarity: 'common',
-			description:
-				'Discard one attached item or effect card from any of your Hermits.\nYou can use another single use effect card this turn.',
-			log: (values) => `${values.defaultLog} to discard ${getFormattedName(values.pick.id, false)}`,
-		})
-	}
-
+class FireChargeSingleUseCard extends Card {
 	pickCondition = slot.every(
 		slot.player,
 		slot.not(slot.frozen),
 		slot.not(slot.empty),
-		slot.some(slot.itemSlot, slot.effectSlot)
+		slot.some(slot.itemSlot, slot.attachSlot)
 	)
 
-	override _attachCondition = slot.every(
-		super.attachCondition,
-		slot.someSlotFulfills(this.pickCondition)
-	)
+	props: SingleUse = {
+		...singleUse,
+		id: 'fire_charge',
+		numericId: 142,
+		name: 'Fire Charge',
+		expansion: 'alter_egos',
+		rarity: 'common',
+		tokens: 0,
+		description:
+			'Discard one attached item or effect card from any of your Hermits.\nYou can use another single use effect card this turn.',
+		attachCondition: slot.every(
+			singleUse.attachCondition,
+			slot.someSlotFulfills(this.pickCondition)
+		),
+		log: (values) => `${values.defaultLog} to discard ${getFormattedName(values.pick.id, false)}`,
+	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
 		const {player} = pos
 
 		game.addPickRequest({
 			playerId: player.id,
-			id: this.id,
+			id: this.props.id,
 			message: 'Pick an item or effect card from one of your active or AFK Hermits',
 			canPick: this.pickCondition,
 			onResult(pickedSlot) {
@@ -62,10 +62,6 @@ class FireChargeSingleUseCard extends SingleUseCard {
 		const {player} = pos
 
 		player.hooks.afterApply.remove(instance)
-	}
-
-	override getExpansion() {
-		return 'alter_egos'
 	}
 }
 

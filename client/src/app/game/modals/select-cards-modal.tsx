@@ -2,11 +2,12 @@ import {useSelector, useDispatch} from 'react-redux'
 import {useState} from 'react'
 import Modal from 'components/modal'
 import CardList from 'components/card-list'
-import {CardT, ModalData} from 'common/types/game-state'
+import {ModalData} from 'common/types/game-state'
 import css from './game-modals.module.scss'
 import {modalRequest} from 'logic/game/game-actions'
 import Button from 'components/button'
 import {getGameState} from 'logic/game/game-selectors'
+import {LocalCardInstance} from 'common/types/server-requests'
 
 type Props = {
 	closeModal: () => void
@@ -17,13 +18,13 @@ function SelectCardsModal({closeModal}: Props) {
 
 	const modalData: ModalData | null | undefined = useSelector(getGameState)?.currentModalData
 	if (!modalData) return null
-	const [selected, setSelected] = useState<Array<CardT>>([])
-	const cards: Array<CardT> = modalData.payload.cards
+	const [selected, setSelected] = useState<Array<LocalCardInstance>>([])
+	const cards: Array<LocalCardInstance> = modalData.payload.cards
 	const selectionSize = modalData.payload.selectionSize
 	const primaryButton = modalData.payload.primaryButton
 	const secondaryButton = modalData.payload.secondaryButton
 
-	const handleSelection = (newSelected: CardT) => {
+	const handleSelection = (newSelected: LocalCardInstance) => {
 		if (selectionSize === 0) return
 
 		setSelected((current) => {

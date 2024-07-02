@@ -1,33 +1,33 @@
-import {HERMIT_CARDS} from '../..'
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {slot} from '../../../slot'
 import {HermitAttackType} from '../../../types/attack'
-import {CardT} from '../../../types/game-state'
-import HermitCard from '../../base/hermit-card'
+import {CardInstance} from '../../../types/game-state'
+import Card, {Hermit, hermit} from '../../base/card'
 
-class ZombieCleoRareHermitCard extends HermitCard {
-	constructor() {
-		super({
-			id: 'zombiecleo_rare',
-			numericId: 116,
-			name: 'Cleo',
-			rarity: 'rare',
-			hermitType: 'pvp',
-			health: 290,
-			primary: {
-				name: 'Dismissed',
-				cost: ['pvp'],
-				damage: 60,
-				power: null,
-			},
-			secondary: {
-				name: 'Puppetry',
-				cost: ['pvp', 'pvp', 'pvp'],
-				damage: 0,
-				power: 'Use an attack from any of your AFK Hermits.',
-			},
-		})
+class ZombieCleoRareHermitCard extends Card {
+	props: Hermit = {
+		...hermit,
+		id: 'zombiecleo_rare',
+		numericId: 116,
+		name: 'Cleo',
+		expansion: 'default',
+		rarity: 'rare',
+		tokens: 3,
+		type: 'pvp',
+		health: 290,
+		primary: {
+			name: 'Dismissed',
+			cost: ['pvp'],
+			damage: 60,
+			power: null,
+		},
+		secondary: {
+			name: 'Puppetry',
+			cost: ['pvp', 'pvp', 'pvp'],
+			damage: 0,
+			power: 'Use an attack from any of your AFK Hermits.',
+		},
 	}
 
 	pickCondition = slot.every(
@@ -35,7 +35,7 @@ class ZombieCleoRareHermitCard extends HermitCard {
 		slot.hermitSlot,
 		slot.not(slot.empty),
 		slot.not(slot.activeRow),
-		slot.not(slot.hasId(this.id))
+		slot.not(slot.hasId(this.props.id))
 	)
 
 	override getAttack(
@@ -50,7 +50,7 @@ class ZombieCleoRareHermitCard extends HermitCard {
 
 		if (!attack || attack.type !== 'secondary') return attack
 
-		const pickedCard: CardT = player.custom[pickedCardKey]?.card
+		const pickedCard: CardInstance = player.custom[pickedCardKey]?.card
 		const attackType = player.custom[pickedCardKey]?.attack
 
 		// Delete the stored data straight away
@@ -59,21 +59,20 @@ class ZombieCleoRareHermitCard extends HermitCard {
 		if (!pickedCard || !attackType) return null
 
 		// No loops please
-		if (pickedCard.cardId === this.id) return null
+		if (pickedCard.props.id === this.props.id) return null
 
-		const hermitInfo = HERMIT_CARDS[pickedCard.cardId]
-		if (!hermitInfo) return null
+		if (!pickedCard.isHermit()) return null
 
 		// Return that cards secondary attack
-		const newAttack = hermitInfo.getAttack(game, pickedCard.cardInstance, pos, attackType)
+		const newAttack = pickedCard.card.getAttack(game, pickedCard.instance, pos, attackType)
 		if (!newAttack) return null
 		const attackName =
-			newAttack.type === 'primary' ? hermitInfo.primary.name : hermitInfo.secondary.name
+			newAttack.type === 'primary' ? pickedCard.props.primary.name : pickedCard.props.secondary.name
 		newAttack.updateLog(
 			(values) =>
 				`${values.attacker} ${values.coinFlip ? values.coinFlip + ', then ' : ''} attacked ${
 					values.target
-				} with $v${hermitInfo.name}'s ${attackName}$ for ${values.damage} damage`
+				} with $v${pickedCard.props.name}'s ${attackName}$ for ${values.damage} damage`
 		)
 		return newAttack
 	}
@@ -94,10 +93,10 @@ class ZombieCleoRareHermitCard extends HermitCard {
 
 			game.addPickRequest({
 				playerId: player.id,
-				id: this.id,
+				id: this.props.id,
 				message: 'Pick one of your AFK Hermits',
 				canPick: this.pickCondition,
-				onResult(pickedSlot) {
+				onResult: (pickedSlot) => {
 					const rowIndex = pickedSlot.rowIndex
 					if (rowIndex === null) return
 					if (rowIndex === player.board.activeRow) return
@@ -105,7 +104,7 @@ class ZombieCleoRareHermitCard extends HermitCard {
 					if (!pickedCard) return
 
 					// No picking the same card as us
-					if (pickedCard.cardId === this.id) return
+					if (pickedCard.props.id === this.props.id) return
 
 					game.addModalRequest({
 						playerId: player.id,
@@ -134,7 +133,7 @@ class ZombieCleoRareHermitCard extends HermitCard {
 							}
 
 							// Add the attack requests of the chosen card as they would not be called otherwise
-							player.hooks.getAttackRequests.call(pickedCard.cardInstance, modalResult.pick)
+							player.hooks.getAttackRequests.call(pickedCard.instance, modalResult.pick)
 
 							return 'SUCCESS'
 						},

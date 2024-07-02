@@ -1,31 +1,32 @@
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {flipCoin} from '../../../utils/coinFlips'
-import HermitCard from '../../base/hermit-card'
+import Card, {Hermit, hermit} from '../../base/card'
 
-class ZedaphPlaysRareHermitCard extends HermitCard {
-	constructor() {
-		super({
-			id: 'zedaphplays_rare',
-			numericId: 114,
-			name: 'Zedaph',
-			rarity: 'rare',
-			hermitType: 'explorer',
-			health: 290,
-			primary: {
-				name: 'Sheep Stare',
-				cost: ['explorer'],
-				damage: 50,
-				power:
-					"Flip a coin.\nIf heads, on your opponent's next turn, flip a coin.\nIf heads, your opponent's active Hermit attacks themselves.",
-			},
-			secondary: {
-				name: 'Get Dangled',
-				cost: ['explorer', 'explorer'],
-				damage: 80,
-				power: null,
-			},
-		})
+class ZedaphPlaysRareHermitCard extends Card {
+	props: Hermit = {
+		...hermit,
+		id: 'zedaphplays_rare',
+		numericId: 114,
+		name: 'Zedaph',
+		expansion: 'default',
+		rarity: 'rare',
+		type: 'explorer',
+		tokens: 2,
+		health: 290,
+		primary: {
+			name: 'Sheep Stare',
+			cost: ['explorer'],
+			damage: 50,
+			power:
+				"Flip a coin.\nIf heads, on your opponent's next turn, flip a coin.\nIf heads, your opponent's active Hermit attacks themselves.",
+		},
+		secondary: {
+			name: 'Get Dangled',
+			cost: ['explorer', 'explorer'],
+			damage: 80,
+			power: null,
+		},
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
@@ -53,7 +54,7 @@ class ZedaphPlaysRareHermitCard extends HermitCard {
 
 				if (player.custom[coinFlipResult] === 'heads') {
 					// Change attack target - this just works
-					attack.setTarget(this.id, attack.getAttacker())
+					attack.setTarget(this.props.id, attack.getAttacker())
 				}
 			})
 

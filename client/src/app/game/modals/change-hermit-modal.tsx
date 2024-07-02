@@ -21,7 +21,7 @@ function ChangeHermitModal({closeModal, info}: Props) {
 		throw new Error('This should never happen')
 	}
 
-	const hermitName = info.card?.cardId ? CARDS[info.card.cardId].name : ''
+	const hermitName = info.card?.props.name || ''
 	const hasActiveHermit = playerState.board.activeRow !== null
 	const canChange = !hasActiveHermit || availableActions.includes('CHANGE_ACTIVE_HERMIT')
 

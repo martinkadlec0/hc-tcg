@@ -1,31 +1,32 @@
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {slot} from '../../../slot'
-import HermitCard from '../../base/hermit-card'
+import Card, {Hermit, hermit} from '../../base/card'
 
-class IJevinRareHermitCard extends HermitCard {
-	constructor() {
-		super({
-			id: 'ijevin_rare',
-			numericId: 39,
-			name: 'Jevin',
-			rarity: 'rare',
-			hermitType: 'speedrunner',
-			health: 300,
-			primary: {
-				name: 'Your Boi',
-				cost: ['any'],
-				damage: 30,
-				power: null,
-			},
-			secondary: {
-				name: 'Peace Out',
-				cost: ['speedrunner', 'speedrunner', 'any'],
-				damage: 90,
-				power:
-					'After your attack, your opponent must choose an AFK Hermit to set as their active Hermit, unless they have no AFK Hermits.',
-			},
-		})
+class IJevinRareHermitCard extends Card {
+	props: Hermit = {
+		...hermit,
+		id: 'ijevin_rare',
+		numericId: 39,
+		name: 'Jevin',
+		expansion: 'default',
+		rarity: 'rare',
+		tokens: 1,
+		type: 'speedrunner',
+		health: 300,
+		primary: {
+			name: 'Your Boi',
+			cost: ['any'],
+			damage: 30,
+			power: null,
+		},
+		secondary: {
+			name: 'Peace Out',
+			cost: ['speedrunner', 'speedrunner', 'any'],
+			damage: 90,
+			power:
+				'After your attack, your opponent must choose an AFK Hermit to set as their active Hermit, unless they have no AFK Hermits.',
+		},
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
@@ -45,7 +46,7 @@ class IJevinRareHermitCard extends HermitCard {
 
 			game.addPickRequest({
 				playerId: opponentPlayer.id, // For opponent player to pick
-				id: this.id,
+				id: this.props.id,
 				message: 'Choose a new active Hermit from your AFK Hermits.',
 				canPick: pickCondition,
 				onResult(pickedSlot) {

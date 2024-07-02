@@ -1,20 +1,21 @@
-import ItemCard from '../../base/item-card'
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
+import Card, {Item, item} from '../../base/card'
 
-class RedstoneCommonItemCard extends ItemCard {
-	constructor() {
-		super({
-			id: 'item_redstone_common',
-			numericId: 63,
-			name: 'Redstone',
-			rarity: 'common',
-			hermitType: 'redstone',
-		})
+class RedstoneCommonItemCard extends Card {
+	props: Item = {
+		...item,
+		id: 'item_redstone_common',
+		numericId: 63,
+		name: 'Redstone',
+		expansion: 'default',
+		rarity: 'common',
+		tokens: 2,
+		type: 'redstone',
 	}
 
-	getEnergy(game: GameModel, instance: string, pos: CardPosModel) {
-		return [this.hermitType]
+	override getEnergy(game: GameModel, instance: string, pos: CardPosModel) {
+		return [this.props.type]
 	}
 }
 

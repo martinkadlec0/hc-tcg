@@ -1,7 +1,7 @@
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {slot} from '../../../slot'
-import {CardT} from '../../../types/game-state'
+import {CardInstance} from '../../../types/game-state'
 import SingleUseCard from '../../base/single-use-card'
 
 class LanternSingleUseCard extends SingleUseCard {
@@ -49,10 +49,10 @@ class LanternSingleUseCard extends SingleUseCard {
 					if (!modalResult.cards) return 'FAILURE_INVALID_DATA'
 					if (modalResult.cards.length !== 2) return 'FAILURE_INVALID_DATA'
 
-					const cards: Array<CardT> = modalResult.cards
+					const cards: Array<CardInstance> = modalResult.cards
 
 					player.pile = player.pile.filter((c) => {
-						if (cards.some((d) => c.cardInstance === d.cardInstance)) return false
+						if (cards.some((d) => c.instance === d.instance)) return false
 						return true
 					})
 

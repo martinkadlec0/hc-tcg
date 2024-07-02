@@ -4,7 +4,6 @@ import css from './game-modals.module.scss'
 import {applyEffect, removeEffect} from 'logic/game/game-actions'
 import {getPlayerState} from 'logic/game/game-selectors'
 import Button from 'components/button'
-import {CARDS} from 'common/cards'
 
 type Props = {
 	closeModal: () => void
@@ -29,10 +28,7 @@ function ConfirmModal({closeModal}: Props) {
 		const singleUseCard = playerState.board.singleUseCard
 
 		if (!singleUseCard) return null
-		const cardId = singleUseCard.cardId
-		const cardName = CARDS[cardId].name
-
-		return cardName
+		return singleUseCard.props.name
 	}
 
 	return (

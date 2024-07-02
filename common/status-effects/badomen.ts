@@ -26,10 +26,7 @@ class BadOmenStatusEffect extends StatusEffect {
 		if (!statusEffectInfo.duration) statusEffectInfo.duration = this.duration
 
 		if (pos.card) {
-			game.battleLog.addEntry(
-				player.id,
-				`$p${CARDS[pos.card.cardId].name}$ was inflicted with $bBad Omen$`
-			)
+			game.battleLog.addEntry(player.id, `$p${pos.card.props.name}$ was inflicted with $bBad Omen$`)
 		}
 
 		opponentPlayer.hooks.onTurnStart.add(statusEffectInfo.statusEffectInstance, () => {
@@ -46,7 +43,7 @@ class BadOmenStatusEffect extends StatusEffect {
 			// Only modify when the target hermit is "flipping"
 			const {currentPlayer} = game
 			if (
-				statusEffectInfo.targetInstance !== card.cardInstance &&
+				statusEffectInfo.targetInstance !== card.instance &&
 				(currentPlayer.id !== player.id || player.board.activeRow !== targetPos?.rowIndex)
 			) {
 				return coinFlips

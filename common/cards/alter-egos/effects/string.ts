@@ -1,31 +1,25 @@
 import {slot} from '../../../slot'
-import EffectCard from '../../base/effect-card'
+import Card, {Attach, attach} from '../../base/card'
 
-class StringEffectCard extends EffectCard {
-	constructor() {
-		super({
-			id: 'string',
-			numericId: 122,
-			name: 'String',
-			rarity: 'rare',
-			description:
-				"Attach to one of your opponent's empty item or effect slots.\nYour opponent can no longer attach cards to that slot.",
-			log: (values) =>
-				`$o{${values.opponent}|You}$ attached $eString$ to $p${values.pos.hermitCard}$`,
-		})
-	}
-
-	override _attachCondition = slot.every(
-		slot.opponent,
-		slot.rowHasHermit,
-		slot.empty,
-		slot.actionAvailable('PLAY_EFFECT_CARD'),
-		slot.not(slot.frozen),
-		slot.some(slot.effectSlot, slot.itemSlot)
-	)
-
-	override getExpansion() {
-		return 'alter_egos'
+class StringEffectCard extends Card {
+	props: Attach = {
+		...attach,
+		id: 'string',
+		numericId: 122,
+		name: 'String',
+		expansion: 'alter_egos',
+		rarity: 'rare',
+		tokens: 2,
+		description:
+			"Attach to one of your opponent's empty item or effect slots.\nYour opponent can no longer attach cards to that slot.",
+		log: (values) =>
+			`$o{${values.opponent}|You}$ attached $eString$ to $p${values.pos.hermitCard}$`,
+		attachCondition: slot.every(
+			slot.opponent,
+			slot.rowHasHermit,
+			slot.empty,
+			slot.some(slot.attachSlot, slot.itemSlot)
+		),
 	}
 }
 

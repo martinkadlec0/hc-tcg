@@ -13,7 +13,7 @@ class PharaohRareHermitCard extends HermitCard {
 			numericId: 214,
 			name: 'Pharaoh',
 			rarity: 'rare',
-			hermitType: 'balanced',
+			type: 'balanced',
 			health: 300,
 			primary: {
 				name: 'Targét',

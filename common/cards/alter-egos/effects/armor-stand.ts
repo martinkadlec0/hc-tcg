@@ -1,29 +1,28 @@
-import EffectCard from '../../base/effect-card'
 import {GameModel} from '../../../models/game-model'
 import {CardPosModel} from '../../../models/card-pos-model'
-import {hermitCardBattleLog} from '../../base/hermit-card'
 import {slot} from '../../../slot'
+import Card, {Attach, attach, hermit, hermitBattleLog} from '../../base/card'
 
-class ArmorStandEffectCard extends EffectCard {
-	constructor() {
-		super({
-			id: 'armor_stand',
-			numericId: 118,
-			name: 'Armour Stand',
-			rarity: 'ultra_rare',
-			description:
-				'Use like a Hermit card with a maximum 50hp.\nYou can not attach any cards to this card. While this card is active, you can not attack, or use damaging effect cards.\nIf this card is knocked out, it does not count as a knockout.',
-			log: hermitCardBattleLog('Armour Stand'),
-		})
+class ArmorStandEffectCard extends Card {
+	props: Attach = {
+		...attach,
+		id: 'armor_stand',
+		numericId: 118,
+		name: 'Armour Stand',
+		expansion: 'alter_egos',
+		rarity: 'ultra_rare',
+		tokens: 2,
+		description:
+			'Use like a Hermit card with a maximum 50hp.\nYou can not attach any cards to this card. While this card is active, you can not attack, or use damaging effect cards.\nIf this card is knocked out, it does not count as a knockout.',
+		sidebarDescriptions: [
+			{
+				type: 'glossary',
+				name: 'knockout',
+			},
+		],
+		attachCondition: hermit.attachCondition,
+		log: hermitBattleLog('Armour Stand'),
 	}
-
-	override _attachCondition = slot.every(
-		slot.hermitSlot,
-		slot.player,
-		slot.empty,
-		slot.actionAvailable('PLAY_EFFECT_CARD'),
-		slot.not(slot.frozen)
-	)
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
 		const {player, row} = pos
@@ -60,23 +59,6 @@ class ArmorStandEffectCard extends EffectCard {
 		opponentPlayer.hooks.afterAttack.remove(instance)
 		player.hooks.freezeSlots.remove(instance)
 		delete player.custom[this.getInstanceKey(instance)]
-	}
-
-	override getExpansion() {
-		return 'alter_egos'
-	}
-
-	override showAttachTooltip() {
-		return false
-	}
-
-	override sidebarDescriptions() {
-		return [
-			{
-				type: 'glossary',
-				name: 'knockout',
-			},
-		]
 	}
 }
 

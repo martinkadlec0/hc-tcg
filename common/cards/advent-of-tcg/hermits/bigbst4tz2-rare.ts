@@ -14,7 +14,7 @@ class BigBSt4tzRareHermitCard extends HermitCard {
 			numericId: 207,
 			name: 'BigB',
 			rarity: 'rare',
-			hermitType: 'speedrunner',
+			type: 'speedrunner',
 			health: 270,
 			primary: {
 				name: 'Terry',

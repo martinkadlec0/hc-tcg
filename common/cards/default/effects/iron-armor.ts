@@ -1,18 +1,19 @@
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {isTargetingPos} from '../../../utils/attacks'
-import EffectCard from '../../base/effect-card'
+import Card, {Attach, attach} from '../../base/card'
 
-class IronArmorEffectCard extends EffectCard {
-	constructor() {
-		super({
-			id: 'iron_armor',
-			numericId: 45,
-			name: 'Iron Armour',
-			rarity: 'common',
-			description:
-				'When the Hermit this card is attached to takes damage, that damage is reduced by up to 20hp each turn.',
-		})
+class IronArmorEffectCard extends Card {
+	props: Attach = {
+		...attach,
+		id: 'iron_armor',
+		numericId: 45,
+		name: 'Iron Armour',
+		expansion: 'default',
+		rarity: 'common',
+		tokens: 2,
+		description:
+			'When the Hermit this card is attached to takes damage, that damage is reduced by up to 20hp each turn.',
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
@@ -31,7 +32,7 @@ class IronArmorEffectCard extends EffectCard {
 			if (totalReduction < 20) {
 				const damageReduction = Math.min(attack.calculateDamage(), 20 - totalReduction)
 				player.custom[instanceKey] += damageReduction
-				attack.reduceDamage(this.id, damageReduction)
+				attack.reduceDamage(this.props.id, damageReduction)
 			}
 		})
 

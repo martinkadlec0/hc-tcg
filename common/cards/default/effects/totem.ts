@@ -2,21 +2,27 @@ import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {isTargetingPos} from '../../../utils/attacks'
 import {discardCard} from '../../../utils/movement'
-import EffectCard from '../../base/effect-card'
 import {removeStatusEffect} from '../../../utils/board'
-import {HERMIT_CARDS} from '../..'
 import {AttackModel} from '../../../models/attack-model'
+import Card, {Attach, attach} from '../../base/card'
 
-class TotemEffectCard extends EffectCard {
-	constructor() {
-		super({
-			id: 'totem',
-			numericId: 101,
-			name: 'Totem',
-			rarity: 'ultra_rare',
-			description:
-				'If the Hermit this card is attached to is knocked out, they are revived with 10hp.\nDoes not count as a knockout. Discard after use.',
-		})
+class TotemEffectCard extends Card {
+	props: Attach = {
+		...attach,
+		id: 'totem',
+		numericId: 101,
+		name: 'Totem',
+		expansion: 'default',
+		rarity: 'ultra_rare',
+		tokens: 3,
+		description:
+			'If the Hermit this card is attached to is knocked out, they are revived with 10hp.\nDoes not count as a knockout. Discard after use.',
+		sidebarDescriptions: [
+			{
+				type: 'glossary',
+				name: 'knockout',
+			},
+		],
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
@@ -31,13 +37,13 @@ class TotemEffectCard extends EffectCard {
 			row.health = 10
 
 			const statusEffectsToRemove = game.state.statusEffects.filter((ail) => {
-				return ail.targetInstance === pos.card?.cardInstance
+				return ail.targetInstance === pos.card?.instance
 			})
 			statusEffectsToRemove.forEach((ail) => {
 				removeStatusEffect(game, pos, ail.statusEffectInstance)
 			})
 
-			const revivedHermit = HERMIT_CARDS[row.hermitCard.cardId].name
+			const revivedHermit = row.hermitCard.props.name
 			game.battleLog.addEntry(player.id, `Using $eTotem$, $p${revivedHermit}$ revived with $g10hp$`)
 
 			// This will remove this hook, so it'll only be called once
@@ -56,15 +62,6 @@ class TotemEffectCard extends EffectCard {
 	override onDetach(game: GameModel, instance: string, pos: CardPosModel) {
 		pos.player.hooks.afterDefence.remove(instance)
 		pos.opponentPlayer.hooks.afterAttack.remove(instance)
-	}
-
-	override sidebarDescriptions() {
-		return [
-			{
-				type: 'glossary',
-				name: 'knockout',
-			},
-		]
 	}
 }
 

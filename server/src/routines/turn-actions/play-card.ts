@@ -1,12 +1,11 @@
-import {CARDS, HERMIT_CARDS} from 'common/cards'
 import {GameModel} from 'common/models/game-model'
 import {equalCard} from 'common/utils/cards'
 import {PlayCardActionData} from 'common/types/action-data'
 import {CardPosModel} from 'common/models/card-pos-model'
-import {ActionResult} from 'common/types/game-state'
+import {ActionResult, CardInstance} from 'common/types/game-state'
 import {DEBUG_CONFIG} from 'common/config'
-import {callSlotConditionWithPickInfo} from 'common/slot'
 import {SlotInfo} from 'common/types/cards'
+import {Attach, HasHealth, Item, SingleUse} from 'common/cards/base/card'
 
 function* playCardSaga(
 	game: GameModel,
@@ -14,16 +13,17 @@ function* playCardSaga(
 ): Generator<any, ActionResult> {
 	// Make sure data sent from client is correct
 	const pickInfo = turnAction?.payload?.pickInfo
-	const card = turnAction?.payload?.card
-	if (!pickInfo || !card || !pickInfo.playerId || !pickInfo) {
+	const localCard = turnAction?.payload?.card
+	if (!pickInfo || !localCard || !pickInfo.playerId || !pickInfo) {
 		return 'FAILURE_INVALID_DATA'
 	}
+
+	const card = CardInstance.fromLocalCardInstance(localCard)
 
 	const {currentPlayer} = game
 
 	const {playerId, rowIndex: pickedIndex, type, index} = pickInfo
 
-	const cardInfo = CARDS[card.cardId]
 	// opponentPlayerId is relative to where the card is being placed
 	const opponentPlayerId = playerId === currentPlayer.id ? game.opponentPlayerId : currentPlayer.id
 
@@ -47,7 +47,15 @@ function* playCardSaga(
 	const opponentPlayer = game.state.players[opponentPlayerId]
 
 	// Do we meet requirements to place the card
-	const canAttach = callSlotConditionWithPickInfo(cardInfo.attachCondition, game, pickInfo)
+	const canAttach = card.card.props.attachCondition(game, {
+		player: player,
+		opponentPlayer: opponentPlayer,
+		type: pickInfo.type,
+		rowIndex: pickInfo.rowIndex !== undefined ? pickInfo.rowIndex : null,
+		row: row,
+		index: pickInfo.index,
+		card: pickInfo.card ? CardInstance.fromLocalCardInstance(pickInfo.card) : null,
+	})
 
 	// It's the wrong kind of slot or does not satisfy the condition
 	if (!canAttach) return 'FAILURE_INVALID_SLOT'
@@ -57,7 +65,7 @@ function* playCardSaga(
 
 	// Single use slot
 	if (type === 'single_use') {
-		player.board.singleUseCard = card
+		player.board.singleUseCard = card as CardInstance<SingleUse>
 	} else {
 		// All other positions requires us to have selected a valid row
 		if (!row || rowIndex === null) return 'FAILURE_CANNOT_COMPLETE'
@@ -65,13 +73,12 @@ function* playCardSaga(
 		switch (type) {
 			case 'hermit': {
 				player.hasPlacedHermit = true
-				row.hermitCard = card
+				if (!card.card.isHealth()) return 'FAILURE_INVALID_DATA'
+
+				row.hermitCard = card as CardInstance<HasHealth>
 
 				// If the card is not a hermit card it will have to set the row health itself
-				const hermitCardInfo = HERMIT_CARDS[cardInfo.id]
-				if (hermitCardInfo) {
-					row.health = HERMIT_CARDS[cardInfo.id].health
-				}
+				row.health = row.hermitCard.card.props.health
 
 				if (player.board.activeRow === null) {
 					game.changeActiveRow(player, rowIndex)
@@ -81,11 +88,13 @@ function* playCardSaga(
 			}
 			case 'item': {
 				if (index === null) break
-				row.itemCards[index] = card
+				if (!card.card.isItem()) return 'FAILURE_INVALID_DATA'
+				row.itemCards[index] = card as CardInstance<Item>
 				break
 			}
-			case 'effect': {
-				row.effectCard = card
+			case 'attach': {
+				if (!card.card.isAttach()) return 'FAILURE_INVALID_DATA'
+				row.effectCard = card as CardInstance<Attach>
 				break
 			}
 			default:
@@ -102,7 +111,7 @@ function* playCardSaga(
 		index,
 		card,
 	}
-	const pos = new CardPosModel(game, slotInfo, card.cardInstance)
+	const pos = new CardPosModel(game, slotInfo, card.instance)
 
 	// Remove the card from the hand
 	if (!DEBUG_CONFIG.unlimitedCards) {
@@ -111,13 +120,13 @@ function* playCardSaga(
 
 	// Add entry to battle log, unless it is played in a single use slot
 	if (pickInfo.type !== 'single_use') {
-		game.battleLog.addPlayCardEntry(cardInfo, pos, currentPlayer.coinFlips, undefined)
+		game.battleLog.addPlayCardEntry(card.card, pos, currentPlayer.coinFlips, undefined)
 	}
 
-	cardInfo.onAttach(game, card.cardInstance, pos)
+	card.card.onAttach(game, card.instance, pos)
 
 	// Call onAttach hook
-	currentPlayer.hooks.onAttach.call(card.cardInstance)
+	currentPlayer.hooks.onAttach.call(card.instance)
 
 	return 'SUCCESS'
 }

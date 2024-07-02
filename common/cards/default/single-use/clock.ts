@@ -3,29 +3,32 @@ import {GameModel} from '../../../models/game-model'
 import {slot} from '../../../slot'
 import {TurnActions} from '../../../types/game-state'
 import {applyStatusEffect, getActiveRow} from '../../../utils/board'
-import SingleUseCard from '../../base/single-use-card'
+import Card, {SingleUse, singleUse} from '../../base/card'
 
-class ClockSingleUseCard extends SingleUseCard {
-	constructor() {
-		super({
-			id: 'clock',
-			numericId: 6,
-			name: 'Clock',
-			rarity: 'ultra_rare',
-			description:
-				'Your opponent skips their next turn.\nThis card can not be returned to your hand from your discard pile.',
-			log: (values) => `${values.defaultLog} and skipped {$o${values.opponent}'s$|your} turn`,
-		})
-	}
-
-	override _attachCondition = slot.every(
-		super.attachCondition,
-		slot.not(slot.someSlotFulfills(slot.hasStatusEffect('used-clock'))),
-		(game, pos) => game.state.turn.turnNumber !== 1
-	)
-
-	override canApply() {
-		return true
+class ClockSingleUseCard extends Card {
+	props: SingleUse = {
+		...singleUse,
+		id: 'clock',
+		numericId: 6,
+		name: 'Clock',
+		expansion: 'default',
+		rarity: 'ultra_rare',
+		tokens: 4,
+		description:
+			'Your opponent skips their next turn.\nThis card can not be returned to your hand from your discard pile.',
+		showConfirmationModal: true,
+		sidebarDescriptions: [
+			{
+				type: 'glossary',
+				name: 'turnSkip',
+			},
+		],
+		attachCondition: slot.every(
+			singleUse.attachCondition,
+			slot.not(slot.someSlotFulfills(slot.hasStatusEffect('used-clock'))),
+			(game, pos) => game.state.turn.turnNumber !== 1
+		),
+		log: (values) => `${values.defaultLog} and skipped {$o${values.opponent}'s$|your} turn`,
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
@@ -34,7 +37,7 @@ class ClockSingleUseCard extends SingleUseCard {
 		player.hooks.onApply.add(instance, () => {
 			opponentPlayer.hooks.onTurnStart.add(instance, () => {
 				game.addBlockedActions(
-					this.id,
+					this.props.id,
 					'APPLY_EFFECT',
 					'REMOVE_EFFECT',
 					'SINGLE_USE_ATTACK',
@@ -48,22 +51,13 @@ class ClockSingleUseCard extends SingleUseCard {
 				opponentPlayer.hooks.onTurnStart.remove(instance)
 			})
 
-			applyStatusEffect(game, 'used-clock', getActiveRow(player)?.hermitCard.cardInstance)
+			applyStatusEffect(game, 'used-clock', getActiveRow(player)?.hermitCard.instance)
 		})
 	}
 
 	override onDetach(game: GameModel, instance: string, pos: CardPosModel) {
 		const {player} = pos
 		player.hooks.onApply.remove(instance)
-	}
-
-	override sidebarDescriptions() {
-		return [
-			{
-				type: 'glossary',
-				name: 'turnSkip',
-			},
-		]
 	}
 }
 

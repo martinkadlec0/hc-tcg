@@ -12,9 +12,9 @@ import EvilXisumaRareHermitCard from './evilxisuma_rare'
 import HelsknightRareHermitCard from './helsknight-rare'
 import RenbobRareHermitCard from './renbob-rare'
 import HumanCleoRareHermitCard from './humancleo-rare'
-import HermitCard from '../../base/hermit-card'
+import Card from '../../base/card'
 
-const hermitCardClasses: Array<HermitCard> = [
+const hermitCardClasses: Array<Card> = [
 	// AE Cards
 	new BeetlejhostCommonHermitCard(),
 	new EvilJevinCommonHermitCard(),

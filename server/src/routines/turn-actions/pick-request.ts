@@ -1,14 +1,13 @@
 import {GameModel} from 'common/models/game-model'
-import {ActionResult} from 'common/types/game-state'
+import {ActionResult, CardInstance} from 'common/types/game-state'
 import {PickInfo} from 'common/types/server-requests'
 import attackSaga from './attack'
 import {call} from 'typed-redux-saga'
 import {AttackActionData, attackToAttackAction} from 'common/types/action-data'
-import {callSlotConditionWithPickInfo} from 'common/slot'
 
 function* pickRequestSaga(game: GameModel, pickResult?: PickInfo): Generator<any, ActionResult> {
 	// First validate data sent from client
-	if (!pickResult || !pickResult.playerId) return 'FAILURE_INVALID_DATA'
+	if (!pickResult || !pickResult.playerId || !pickResult.card) return 'FAILURE_INVALID_DATA'
 	if (pickResult.index === undefined || !pickResult.type) return 'FAILURE_INVALID_DATA'
 
 	// Find the current pick request
@@ -20,13 +19,7 @@ function* pickRequestSaga(game: GameModel, pickResult?: PickInfo): Generator<any
 	}
 
 	// Call the bound function with the pick result
-	const canPick = callSlotConditionWithPickInfo(pickRequest.canPick, game, pickResult)
-
-	if (!canPick) {
-		return 'FAILURE_INVALID_SLOT'
-	}
-
-	pickRequest.onResult({
+	let slotInfo = {
 		player: game.state.players[pickResult.playerId],
 		opponentPlayer: Object.values(game.state.players).filter(
 			(opponent) => opponent.id !== pickResult.playerId
@@ -38,8 +31,16 @@ function* pickRequestSaga(game: GameModel, pickResult?: PickInfo): Generator<any
 			pickResult.rowIndex !== null
 				? game.state.players[pickResult.playerId].board.rows[pickResult.rowIndex]
 				: null,
-		card: pickResult.card,
-	})
+		card: CardInstance.fromLocalCardInstance(pickResult.card),
+	}
+
+	const canPick = slotInfo.card.card.props.attachCondition(game, slotInfo)
+
+	if (!canPick) {
+		return 'FAILURE_INVALID_SLOT'
+	}
+
+	pickRequest.onResult(slotInfo)
 	game.state.players[pickRequest.playerId].pickableSlots = null
 
 	// We completed this pick request, remove it

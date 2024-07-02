@@ -2,22 +2,9 @@ import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {slot} from '../../../slot'
 import {applySingleUse, getActiveRowPos} from '../../../utils/board'
-import SingleUseCard from '../../base/single-use-card'
+import Card, {SingleUse, singleUse} from '../../base/card'
 
-class LeadSingleUseCard extends SingleUseCard {
-	constructor() {
-		super({
-			id: 'lead',
-			numericId: 75,
-			name: 'Lead',
-			rarity: 'common',
-			description:
-				"Move one of your opponent's attached item cards from their active Hermit to any of their AFK Hermits.",
-			log: (values) =>
-				`${values.defaultLog} to move $m${values.pick.name}$ to $o${values.pick.hermitCard}$`,
-		})
-	}
-
+class LeadSingleUseCard extends Card {
 	firstPickCondition = slot.every(
 		slot.opponent,
 		slot.itemSlot,
@@ -34,11 +21,24 @@ class LeadSingleUseCard extends SingleUseCard {
 		slot.not(slot.frozen)
 	)
 
-	override _attachCondition = slot.every(
-		super.attachCondition,
-		slot.someSlotFulfills(this.firstPickCondition),
-		slot.someSlotFulfills(this.secondPickCondition)
-	)
+	props: SingleUse = {
+		...singleUse,
+		id: 'lead',
+		numericId: 75,
+		name: 'Lead',
+		expansion: 'default',
+		rarity: 'common',
+		tokens: 1,
+		description:
+			"Move one of your opponent's attached item cards from their active Hermit to any of their AFK Hermits.",
+		log: (values) =>
+			`${values.defaultLog} to move $m${values.pick.name}$ to $o${values.pick.hermitCard}$`,
+		attachCondition: slot.every(
+			singleUse.attachCondition,
+			slot.someSlotFulfills(this.firstPickCondition),
+			slot.someSlotFulfills(this.secondPickCondition)
+		),
+	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
 		const {player, opponentPlayer} = pos
@@ -46,20 +46,20 @@ class LeadSingleUseCard extends SingleUseCard {
 
 		game.addPickRequest({
 			playerId: player.id,
-			id: this.id,
+			id: this.props.id,
 			message: "Pick an item card attached to your opponent's active Hermit",
 			canPick: this.firstPickCondition,
 			onResult(pickedSlot) {
 				if (!pickedSlot.card) return
 
 				// Store the index of the chosen item
-				player.custom[itemIndexKey] = pickedSlot.card.cardInstance
+				player.custom[itemIndexKey] = pickedSlot.card.instance
 			},
 		})
 
 		game.addPickRequest({
 			playerId: player.id,
-			id: this.id,
+			id: this.props.id,
 			message: "Pick an empty item slot on one of your opponent's AFK Hermits",
 			canPick: this.secondPickCondition,
 			onResult(pickedSlot) {

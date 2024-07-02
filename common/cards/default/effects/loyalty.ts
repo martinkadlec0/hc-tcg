@@ -1,19 +1,20 @@
 import {AttackModel} from '../../../models/attack-model'
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
-import {moveCardToHand} from '../../../utils/movement'
-import EffectCard from '../../base/effect-card'
+import {moveCardInstanceoHand} from '../../../utils/movement'
+import Card, {Attach, attach} from '../../base/card'
 
-class LoyaltyEffectCard extends EffectCard {
-	constructor() {
-		super({
-			id: 'loyalty',
-			numericId: 77,
-			name: 'Loyalty',
-			rarity: 'rare',
-			description:
-				'When the Hermit that this card is attached to is knocked out, all attached item cards are returned to your hand.',
-		})
+class LoyaltyEffectCard extends Card {
+	props: Attach = {
+		...attach,
+		id: 'loyalty',
+		numericId: 77,
+		name: 'Loyalty',
+		expansion: 'default',
+		rarity: 'rare',
+		tokens: 0,
+		description:
+			'When the Hermit that this card is attached to is knocked out, all attached item cards are returned to your hand.',
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
@@ -28,7 +29,7 @@ class LoyaltyEffectCard extends EffectCard {
 			for (let i = 0; i < attackTarget.row.itemCards.length; i++) {
 				const card = attackTarget.row.itemCards[i]
 				if (card) {
-					moveCardToHand(game, card)
+					moveCardInstanceoHand(game, card)
 				}
 			}
 		}

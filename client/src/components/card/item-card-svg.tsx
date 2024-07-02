@@ -1,23 +1,23 @@
 import classnames from 'classnames'
-import ItemCard from '../../../../common/cards/base/item-card'
 import css from './item-card-svg.module.scss'
 import {useSelector} from 'react-redux'
 import {getGameState} from 'logic/game/game-selectors'
-import {getCardRank} from 'common/utils/ranks'
 import {memo} from 'react'
+import Card, {Item, WithoutFunctions} from 'common/cards/base/card'
+import {getCardRank} from 'common/utils/ranks'
 
 export type ItemCardProps = {
-	card: ItemCard
+	card: WithoutFunctions<Item>
 }
 
 const ItemCardModule = memo(({card}: ItemCardProps) => {
-	const rank = getCardRank(card.id)
+	const rank = getCardRank(card.tokens)
 	const showCost = !useSelector(getGameState)
 	return (
 		<svg className={css.card} width="100%" height="100%" viewBox="0 0 400 400">
 			<rect
 				className={classnames(css.cardBackground, {
-					[css[card.hermitType]]: true,
+					[css[card.type]]: true,
 				})}
 				x="10"
 				y="10"
@@ -30,7 +30,7 @@ const ItemCardModule = memo(({card}: ItemCardProps) => {
 				<image className={css.star} href={`/images/star_white.svg`} x="-15" y="65" width="390" />
 				<image
 					className={css.icon}
-					href={`/images/types/type-${card.hermitType}.png`}
+					href={`/images/types/type-${card.type}.png`}
 					width="220"
 					height="220"
 					x="90"
@@ -75,7 +75,7 @@ const ItemCardModule = memo(({card}: ItemCardProps) => {
 				</g>
 			) : null}
 
-			{showCost && rank.name !== 'stone' ? (
+			{showCost && rank !== 'stone' ? (
 				<g>
 					<rect className={css.rarity} x="0" y="302" width="100" height="100" rx="50" ry="50" />
 					<image
@@ -83,7 +83,7 @@ const ItemCardModule = memo(({card}: ItemCardProps) => {
 						y="315"
 						width="70"
 						height="70"
-						href={`/images/ranks/${rank.name}.png`}
+						href={`/images/ranks/${rank}.png`}
 						className={css.rank}
 					/>
 				</g>

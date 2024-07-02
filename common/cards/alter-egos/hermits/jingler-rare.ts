@@ -3,31 +3,33 @@ import {GameModel} from '../../../models/game-model'
 import {slot} from '../../../slot'
 import {flipCoin} from '../../../utils/coinFlips'
 import {discardFromHand} from '../../../utils/movement'
-import HermitCard from '../../base/hermit-card'
+import Card, {Hermit, hermit} from '../../base/card'
 
-class JinglerRareHermitCard extends HermitCard {
-	constructor() {
-		super({
-			id: 'jingler_rare',
-			numericId: 133,
-			name: 'Jingler',
-			rarity: 'rare',
-			hermitType: 'speedrunner',
-			health: 280,
-			primary: {
-				name: 'Jingled',
-				cost: ['speedrunner'],
-				damage: 50,
-				power: null,
-			},
-			secondary: {
-				name: 'Deception',
-				cost: ['speedrunner', 'speedrunner', 'any'],
-				damage: 80,
-				power:
-					'Flip a coin.\nIf heads, your opponent must choose a card to discard from their hand.',
-			},
-		})
+class JinglerRareHermitCard extends Card {
+	props: Hermit = {
+		...hermit,
+		id: 'jingler_rare',
+		numericId: 133,
+		name: 'Jingler',
+		expansion: 'alter_egos',
+		palette: 'alter_egos',
+		background: 'alter_egos',
+		rarity: 'rare',
+		tokens: 1,
+		type: 'speedrunner',
+		health: 280,
+		primary: {
+			name: 'Jingled',
+			cost: ['speedrunner'],
+			damage: 50,
+			power: null,
+		},
+		secondary: {
+			name: 'Deception',
+			cost: ['speedrunner', 'speedrunner', 'any'],
+			damage: 80,
+			power: 'Flip a coin.\nIf heads, your opponent must choose a card to discard from their hand.',
+		},
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
@@ -42,7 +44,7 @@ class JinglerRareHermitCard extends HermitCard {
 
 			game.addPickRequest({
 				playerId: opponentPlayer.id,
-				id: this.id,
+				id: this.props.id,
 				message: 'Pick 1 card from your hand to discard',
 				canPick: slot.hand,
 				onResult(pickedSlot) {
@@ -58,18 +60,6 @@ class JinglerRareHermitCard extends HermitCard {
 	override onDetach(game: GameModel, instance: string, pos: CardPosModel) {
 		const {player} = pos
 		player.hooks.afterAttack.remove(instance)
-	}
-
-	override getExpansion() {
-		return 'alter_egos'
-	}
-
-	override getPalette() {
-		return 'alter_egos'
-	}
-
-	override getBackground() {
-		return 'alter_egos_background'
 	}
 }
 

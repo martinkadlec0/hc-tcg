@@ -6,7 +6,6 @@ import {AttackModel} from '../models/attack-model'
 import {getActiveRowPos, removeStatusEffect} from '../utils/board'
 import {StatusEffectT} from '../types/game-state'
 import {executeExtraAttacks} from '../utils/attacks'
-import {CARDS} from '../cards'
 import {slot} from '../slot'
 
 class PoisonStatusEffect extends StatusEffect {
@@ -27,7 +26,7 @@ class PoisonStatusEffect extends StatusEffect {
 		const {player, opponentPlayer} = pos
 
 		const hasDamageEffect = game.state.statusEffects.some(
-			(a) => a.targetInstance === pos.card?.cardInstance && a.damageEffect === true
+			(a) => a.targetInstance === pos.card?.instance && a.damageEffect === true
 		)
 
 		if (hasDamageEffect) return
@@ -35,7 +34,7 @@ class PoisonStatusEffect extends StatusEffect {
 		game.state.statusEffects.push(statusEffectInfo)
 
 		if (pos.card) {
-			game.battleLog.addEntry(player.id, `$p${CARDS[pos.card.cardId].name}$ was $ePoisoned$`)
+			game.battleLog.addEntry(player.id, `$p${pos.card.props.name}$ was $ePoisoned$`)
 		}
 
 		opponentPlayer.hooks.onTurnEnd.add(statusEffectInfo.statusEffectInstance, () => {
@@ -78,7 +77,7 @@ class PoisonStatusEffect extends StatusEffect {
 		player.hooks.afterDefence.add(statusEffectInfo.statusEffectInstance, (attack) => {
 			const attackTarget = attack.getTarget()
 			if (!attackTarget) return
-			if (attackTarget.row.hermitCard.cardInstance !== statusEffectInfo.targetInstance) return
+			if (attackTarget.row.hermitCard.instance !== statusEffectInfo.targetInstance) return
 			if (attackTarget.row.health > 0) return
 			removeStatusEffect(game, pos, statusEffectInfo.statusEffectInstance)
 		})

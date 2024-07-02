@@ -1,21 +1,19 @@
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
-import SingleUseCard from '../../base/single-use-card'
+import Card, {SingleUse, singleUse} from '../../base/card'
 
-class EfficiencySingleUseCard extends SingleUseCard {
-	constructor() {
-		super({
-			id: 'efficiency',
-			numericId: 17,
-			name: 'Efficiency',
-			rarity: 'rare',
-			description:
-				'Use an attack from your active Hermit without having the necessary item cards attached.',
-		})
-	}
-
-	override canApply() {
-		return true
+class EfficiencySingleUseCard extends Card {
+	props: SingleUse = {
+		...singleUse,
+		id: 'efficiency',
+		numericId: 17,
+		name: 'Efficiency',
+		expansion: 'default',
+		rarity: 'rare',
+		tokens: 1,
+		description:
+			'Use an attack from your active Hermit without having the necessary item cards attached.',
+		showConfirmationModal: true,
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {

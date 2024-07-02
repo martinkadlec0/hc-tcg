@@ -1,37 +1,21 @@
-import {RANKS} from '../config'
 import {RankT} from '../types/cards'
-import Card from '../cards/base/card'
-import {CARDS} from '../cards'
+import {LocalCardInstance} from '../types/server-requests'
 
-export function getCardRank(cardId: string): RankT {
-	let rank: RankT = {name: 'stone', cost: 0}
-	if ((RANKS as Record<string, any>)[cardId]) {
-		rank.cost = (RANKS as Record<string, any>)[cardId]
-
-		const rankKeys = Object.keys(RANKS.ranks)
-		const rankValues = Object.values(RANKS.ranks)
-		for (let i = 0; i < rankKeys.length; i++) {
-			const key = rankKeys[i]
-			const values = rankValues[i]
-			if (values.includes(rank.cost)) rank.name = key
-		}
+export function getCardRank(tokens: number): RankT {
+	if (tokens === 0) {
+		return 'stone'
+	} else if (tokens === 1) {
+		return 'iron'
+	} else if (tokens === 2) {
+		return 'gold'
+	} else if (tokens === 3) {
+		return 'emerald'
+	} else if (tokens === 4) {
+		return 'diamond'
 	}
-	return rank
+	return 'stone'
 }
 
-export function getCardCost(card: Card) {
-	const rank = getCardRank(card.id)
-	return rank.cost
-}
-
-export function getDeckCost(deckCards: Array<string>) {
-	let tokenCost = 0
-
-	deckCards = deckCards.filter((cardId) => CARDS[cardId])
-
-	deckCards.forEach((cardId) => {
-		tokenCost += getCardCost(CARDS[cardId])
-	})
-
-	return tokenCost
+export function getDeckCost(deckCards: Array<LocalCardInstance>) {
+	return deckCards.reduce((cost, card) => (cost += card.props.tokens), 0)
 }

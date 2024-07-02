@@ -2,38 +2,35 @@ import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {slot} from '../../../slot'
 import {discardCard} from '../../../utils/movement'
-import SingleUseCard from '../../base/single-use-card'
+import Card, {SingleUse, singleUse} from '../../base/card'
 
-class CurseOfVanishingSingleUseCard extends SingleUseCard {
-	constructor() {
-		super({
-			id: 'curse_of_vanishing',
-			numericId: 12,
-			name: 'Curse Of Vanishing',
-			rarity: 'common',
-			description: 'Your opponent must discard any effect card attached to their active Hermit.',
-		})
-	}
-
+class CurseOfVanishingSingleUseCard extends Card {
 	discardCondition = slot.every(
 		slot.opponent,
 		slot.activeRow,
-		slot.effectSlot,
+		slot.attachSlot,
 		slot.not(slot.empty),
 		slot.not(slot.frozen)
 	)
 
-	override _attachCondition = slot.every(
-		super.attachCondition,
-		slot.someSlotFulfills(this.discardCondition)
-	)
-
-	override canApply() {
-		return true
+	props: SingleUse = {
+		...singleUse,
+		id: 'curse_of_vanishing',
+		numericId: 12,
+		name: 'Curse Of Vanishing',
+		expansion: 'default',
+		rarity: 'common',
+		tokens: 1,
+		description: 'Your opponent must discard any effect card attached to their active Hermit.',
+		showConfirmationModal: true,
+		attachCondition: slot.every(
+			singleUse.attachCondition,
+			slot.someSlotFulfills(this.discardCondition)
+		),
 	}
 
-	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
-		const {opponentPlayer, player} = pos
+	public override onAttach(game: GameModel, instance: string, pos: CardPosModel): void {
+		const {player} = pos
 
 		player.hooks.onApply.add(instance, () => {
 			game

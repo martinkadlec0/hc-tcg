@@ -1,4 +1,3 @@
-import HermitCard from '../../base/hermit-card'
 import ArchitectFalseCommonHermitCard from '../../alter-egos-ii/hermits/architectfalse-common'
 import BoomerBdubsRareHermitCard from '../../alter-egos-ii/hermits/boomerbdubs-rare'
 import DwarfImpulseCommonHermitCard from '../../alter-egos-ii/hermits/dwarfimpulse-common'
@@ -13,8 +12,9 @@ import ShadEECommonHermitCard from './shadee-common'
 import SpookyStressCommonHermitCard from '../../alter-egos-ii/hermits/spookystress-common'
 import SteampunkTangoCommonHermitCard from '../../alter-egos-ii/hermits/steampunktango-common'
 import WormManCommonHermitCard from '../../alter-egos-ii/hermits/wormman-common'
+import Card from '../../base/card'
 
-const hermitCardClasses: Array<HermitCard> = [
+const hermitCardClasses: Array<Card> = [
 	new ArchitectFalseCommonHermitCard(),
 	new BoomerBdubsRareHermitCard(),
 	new DwarfImpulseCommonHermitCard(),

@@ -1,5 +1,4 @@
 import {RowStateWithHermit} from 'common/types/game-state'
-import {ITEM_CARDS} from 'common/cards'
 import {DEBUG_CONFIG} from 'common/config'
 import {GameModel} from 'common/models/game-model'
 import {getCardPos} from 'common/models/card-pos-model'
@@ -14,12 +13,9 @@ export function getItemCardsEnergy(game: GameModel, row: RowStateWithHermit): nu
 	let total = 0
 	for (const itemCard of itemCards) {
 		if (!itemCard) continue
-		const cardInfo = ITEM_CARDS[itemCard.cardId]
-		// String
-		if (!cardInfo) continue
-		const pos = getCardPos(game, itemCard.cardInstance)
+		const pos = getCardPos(game, itemCard.instance)
 		if (!pos) continue
-		total += cardInfo.getEnergy(game, itemCard.cardInstance, pos).length
+		total += itemCard.card.getEnergy(game, itemCard.instance, pos).length
 	}
 
 	return total
@@ -34,7 +30,7 @@ export function printHooksState(game: GameModel) {
 	// First loop to populate cardsInfo
 	for (const player of [currentPlayer, opponentPlayer]) {
 		for (const card of player.playerDeck) {
-			cardsInfo[card.cardInstance] = {
+			cardsInfo[card.instance] = {
 				card,
 				player: player,
 			}

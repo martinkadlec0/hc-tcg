@@ -7,9 +7,10 @@ import ModalCSS from 'components/alert-modal/alert-modal.module.scss'
 import DropdownCSS from '../../app/deck/deck.module.scss'
 import css from './import-export.module.scss'
 import {getDeckFromHash} from './import-export-utils'
-import {CardT} from '../../../../common/types/game-state'
+import {CardInstance} from '../../../../common/types/game-state'
 import {EnergyT} from 'common/types/cards'
 import {saveDeck} from 'logic/saved-decks/saved-decks'
+import {LocalCardInstance} from 'common/types/server-requests'
 
 type Props = {
 	setOpen: boolean
@@ -26,7 +27,7 @@ export const ImportModal = ({setOpen, onClose, importDeck, handleMassImport}: Pr
 	//IMPORT DECK FUNCTION
 	const importFromHash = () => {
 		if (!hashRef.current) return
-		let deck: Array<CardT> = []
+		let deck: Array<LocalCardInstance> = []
 
 		try {
 			deck = getDeckFromHash(hashRef.current.value)

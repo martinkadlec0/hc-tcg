@@ -11,7 +11,7 @@ class SolidaritygamingRareHermitCard extends HermitCard {
 			numericId: 220,
 			name: 'Jimmy',
 			rarity: 'rare',
-			hermitType: 'prankster',
+			type: 'prankster',
 			health: 270,
 			primary: {
 				name: 'The Law',
@@ -40,7 +40,7 @@ class SolidaritygamingRareHermitCard extends HermitCard {
 
 				const statusEffectsToRemove = game.state.statusEffects.filter((ail) => {
 					return (
-						ail.targetInstance === row.hermitCard.cardInstance && ail.statusEffectId === 'protected'
+						ail.targetInstance === row.hermitCard.instance && ail.statusEffectId === 'protected'
 					)
 				})
 
@@ -67,7 +67,7 @@ class SolidaritygamingRareHermitCard extends HermitCard {
 					const rowIndex = pickedSlot.rowIndex
 					if (!pickedSlot.card || rowIndex === null) return
 
-					applyStatusEffect(game, 'protected', pickedSlot.card.cardInstance)
+					applyStatusEffect(game, 'protected', pickedSlot.card.instance)
 				},
 			})
 		})

@@ -2,38 +2,36 @@ import {CARDS} from '../..'
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {slot} from '../../../slot'
+import {CardInstance} from '../../../types/game-state'
 import {flipCoin} from '../../../utils/coinFlips'
 import {getFormattedName} from '../../../utils/game'
 import {discardFromHand} from '../../../utils/movement'
-import SingleUseCard from '../../base/single-use-card'
+import Card, {SingleUse, singleUse} from '../../base/card'
 
-class SpyglassSingleUseCard extends SingleUseCard {
-	constructor() {
-		super({
-			id: 'spyglass',
-			numericId: 91,
-			name: 'Spyglass',
-			rarity: 'common',
-			description:
-				"Look at your opponent's hand, and then flip a coin.\nIf heads, choose one card to discard from your opponent's hand.",
-			log: (values) => `${values.defaultLog} and ${values.coinFlip}`,
-		})
-	}
-
-	override _attachCondition = slot.every(
-		super.attachCondition,
-		(game, pos) => game.state.turn.turnNumber !== 1
-	)
-
-	override canApply() {
-		return true
+class SpyglassSingleUseCard extends Card<SingleUse> {
+	props: SingleUse = {
+		...singleUse,
+		id: 'spyglass',
+		numericId: 91,
+		name: 'Spyglass',
+		expansion: 'default',
+		rarity: 'common',
+		tokens: 1,
+		description:
+			"Look at your opponent's hand, and then flip a coin.\nIf heads, choose one card to discard from your opponent's hand.",
+		showConfirmationModal: true,
+		log: (values) => `${values.defaultLog} and ${values.coinFlip}`,
+		attachCondition: slot.every(
+			singleUse.attachCondition,
+			(game, pos) => game.state.turn.turnNumber !== 1
+		),
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
 		const {player, opponentPlayer} = pos
 
 		player.hooks.onApply.add(instance, () => {
-			const coinFlip = flipCoin(player, {cardId: this.id, cardInstance: instance})
+			const coinFlip = flipCoin(player, new CardInstance(this, instance))
 			const canDiscard = coinFlip[0] === 'heads' && opponentPlayer.hand.length > 0
 
 			game.addModalRequest({

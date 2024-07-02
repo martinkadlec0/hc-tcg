@@ -56,9 +56,9 @@ import XBCraftedRareHermitCard from './xbcrafted-rare'
 import XisumavoidRareHermitCard from './xisumavoid-rare'
 import ZedaphPlaysRareHermitCard from './zedaphplays-rare'
 import ZombieCleoRareHermitCard from './zombiecleo-rare'
-import HermitCard from '../../base/hermit-card'
+import Card from '../../base/card'
 
-const hermitCardClasses: Array<HermitCard> = [
+const hermitCardClasses: Array<Card> = [
 	new BdoubleO100CommonHermitCard(),
 	new BdoubleO100RareHermitCard(),
 	new Cubfan135CommonHermitCard(),

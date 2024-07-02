@@ -1,20 +1,17 @@
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
-import SingleUseCard from '../../base/single-use-card'
+import Card, {SingleUse, singleUse} from '../../base/card'
 
-class CurseOfBindingSingleUseCard extends SingleUseCard {
-	constructor() {
-		super({
-			id: 'curse_of_binding',
-			numericId: 11,
-			name: 'Curse Of Binding',
-			rarity: 'common',
-			description: 'Your opponent can not make their active Hermit go AFK on their next turn.',
-		})
-	}
-
-	override canApply() {
-		return true
+class CurseOfBindingSingleUseCard extends Card {
+	props: SingleUse = {
+		...singleUse,
+		id: 'curse_of_binding',
+		numericId: 11,
+		name: 'Curse Of Binding',
+		expansion: 'default',
+		rarity: 'common',
+		tokens: 0,
+		description: 'Your opponent can not make their active Hermit go AFK on their next turn.',
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
@@ -22,7 +19,7 @@ class CurseOfBindingSingleUseCard extends SingleUseCard {
 
 		player.hooks.onApply.add(instance, () => {
 			opponentPlayer.hooks.onTurnStart.add(instance, () => {
-				game.addBlockedActions(this.id, 'CHANGE_ACTIVE_HERMIT')
+				game.addBlockedActions(this.props.id, 'CHANGE_ACTIVE_HERMIT')
 
 				opponentPlayer.hooks.onTurnStart.remove(instance)
 			})

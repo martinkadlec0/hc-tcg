@@ -2,18 +2,20 @@ import {AttackModel} from '../../../models/attack-model'
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {applySingleUse, getActiveRowPos} from '../../../utils/board'
-import SingleUseCard from '../../base/single-use-card'
+import Card, {SingleUse, singleUse} from '../../base/card'
 
-class AnvilSingleUseCard extends SingleUseCard {
-	constructor() {
-		super({
-			id: 'anvil',
-			numericId: 138,
-			name: 'Anvil',
-			rarity: 'rare',
-			description:
-				'Do 30hp damage to the Hermit card directly opposite your active Hermit on the game board and 10hp damage to each Hermit below it.',
-		})
+class AnvilSingleUseCard extends Card {
+	props: SingleUse = {
+		...singleUse,
+		id: 'anvil',
+		numericId: 138,
+		name: 'Anvil',
+		expansion: 'alter_egos',
+		rarity: 'rare',
+		tokens: 0,
+		description:
+			'Do 30hp damage to the Hermit card directly opposite your active Hermit on the game board and 10hp damage to each Hermit below it.',
+		hasAttack: true,
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
@@ -42,7 +44,7 @@ class AnvilSingleUseCard extends SingleUseCard {
 						rowIndex === activeIndex
 							? `${values.defaultLog} to attack ${values.target} for ${values.damage} damage`
 							: `, ${values.target} for ${values.damage} damage`,
-				}).addDamage(this.id, rowIndex === activeIndex ? 30 : 10)
+				}).addDamage(this.props.id, rowIndex === activeIndex ? 30 : 10)
 
 				if (r) return r.addNewAttack(newAttack)
 
@@ -67,14 +69,6 @@ class AnvilSingleUseCard extends SingleUseCard {
 		const {player} = pos
 		player.hooks.getAttack.remove(instance)
 		player.hooks.onAttack.remove(instance)
-	}
-
-	override getExpansion() {
-		return 'alter_egos'
-	}
-
-	override canAttack() {
-		return true
 	}
 }
 

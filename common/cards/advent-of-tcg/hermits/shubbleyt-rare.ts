@@ -13,7 +13,7 @@ class ShubbleYTRareHermitCard extends HermitCard {
 			numericId: 217,
 			name: 'Shelby',
 			rarity: 'rare',
-			hermitType: 'terraform',
+			type: 'terraform',
 			health: 300,
 			primary: {
 				name: 'Good Witch',

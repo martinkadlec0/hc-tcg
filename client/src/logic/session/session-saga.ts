@@ -66,14 +66,7 @@ const getDeck: () => PlayerDeckT | null = function () {
 	const name = urlParams.get('name')
 	if (!hash) return null
 	const deckCards = getDeckFromHash(hash)
-	if (
-		validateDeck(
-			deckCards.map((card) => {
-				return card.cardId
-			})
-		)
-	)
-		return null
+	if (validateDeck(deckCards)) return null
 	console.log('Valid deck')
 	if (!name) return {cards: deckCards, name: 'Imported deck', icon: 'any'}
 	return {cards: deckCards, name: name, icon: 'any'}
@@ -146,8 +139,7 @@ export function* loginSaga(): SagaIterator {
 
 		const activeDeckName = getActiveDeckName()
 		const activeDeck = activeDeckName ? getSavedDeck(activeDeckName) : null
-		const activeDeckValid =
-			!!activeDeck && !validateDeck(activeDeck.cards.map((card) => card.cardId))
+		const activeDeckValid = !!activeDeck && !validateDeck(activeDeck.cards)
 
 		// if active deck is not valid, generate and save a starter deck
 		if (urlDeck) {

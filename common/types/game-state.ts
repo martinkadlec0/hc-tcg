@@ -1,24 +1,73 @@
-import {CARDS, HERMIT_CARDS} from '../cards'
+import {CARDS} from '../cards'
+import Card, {
+	Attach,
+	CardProps,
+	HasHealth,
+	Hermit,
+	Item,
+	SingleUse,
+	WithoutFunctions,
+	isAttach,
+	isHealth,
+	isHermit,
+	isSingleUse,
+} from '../cards/base/card'
 import {AttackModel} from '../models/attack-model'
 import {BattleLogModel} from '../models/battle-log-model'
 import {SlotCondition} from '../slot'
 import {FormattedTextNode} from '../utils/formatting'
 import {HermitAttackType} from './attack'
-import {EnergyT, SlotInfo} from './cards'
+import {EnergyT} from './cards'
 import {GameHook, WaterfallHook} from './hooks'
-import {ModalRequest, PickInfo, PickRequest} from './server-requests'
+import {LocalCardInstance, ModalRequest, PickInfo, PickRequest} from './server-requests'
 
 export type PlayerId = string
 
-export type CardT = {
-	cardId: string
-	cardInstance: string
+export class CardInstance<Props extends CardProps = CardProps> {
+	readonly card: Card<Props>
+	readonly instance: string
+
+	constructor(card: Card<Props>, instance: string) {
+		this.card = card
+		this.instance = instance
+	}
+
+	static fromLocalCardInstance(localCardInstance: LocalCardInstance) {
+		return new CardInstance(CARDS[localCardInstance.props.id], localCardInstance.instance)
+	}
+
+	public toLocalCardInstance(): LocalCardInstance<Props> {
+		return {
+			props: this.card.props as WithoutFunctions<Props>,
+			instance: this.instance,
+		}
+	}
+
+	public get props(): Props {
+		return this.card.props
+	}
+
+	public isItem(): this is CardInstance<Item> {
+		return isHermit(this.props)
+	}
+	public isSingleUse(): this is CardInstance<SingleUse> {
+		return isSingleUse(this.props)
+	}
+	public isAttach(): this is CardInstance<Attach> {
+		return isAttach(this.props)
+	}
+	public isHealth(): this is CardInstance<HasHealth> {
+		return isHealth(this.props)
+	}
+	public isHermit(): this is CardInstance<Hermit> {
+		return isHermit(this.props)
+	}
 }
 
 export type RowStateWithHermit = {
-	hermitCard: CardT
-	effectCard: CardT | null
-	itemCards: Array<CardT | null>
+	hermitCard: CardInstance<HasHealth>
+	effectCard: CardInstance<Attach> | null
+	itemCards: Array<CardInstance<Item> | null>
 	health: number
 }
 
@@ -32,25 +81,20 @@ export type RowStateWithoutHermit = {
 export function healHermit(row: RowState | null, amount: number) {
 	if (!row || !row?.hermitCard) return
 
-	const hermitInfo = HERMIT_CARDS[row.hermitCard.cardId]
-
-	let maxHealth: number
-	if (hermitInfo !== undefined) maxHealth = hermitInfo.health
-	else {
-		// This is a hack so armor stand can be healed
-		// This will be fixed once cards are reworked to use a composition based system
-		const cardInfo = CARDS[row.hermitCard.cardId]
-		if (cardInfo.id === 'armor_stand') {
-			maxHealth = 50
-		} else {
-			return
-		}
+	if (!isHealth(row.hermitCard.props)) {
+		return
 	}
-
-	row.health = Math.min(row.health + amount, maxHealth)
+	row.health = Math.min(row.health + amount, row.hermitCard.props.health)
 }
 
 export type RowState = RowStateWithHermit | RowStateWithoutHermit
+
+export type LocalRowState = {
+	hermitCard: LocalCardInstance<HasHealth> | null
+	effectCard: LocalCardInstance<Attach> | null
+	itemCards: Array<LocalCardInstance<Item> | null>
+	health: number | null
+}
 
 export type CoinFlipT = 'heads' | 'tails'
 
@@ -68,7 +112,7 @@ export type StatusEffectT = {
 }
 
 export type CurrentCoinFlipT = {
-	cardId: string
+	card: CardInstance
 	opponentFlip: boolean
 	name: string
 	tosses: Array<CoinFlipT>
@@ -85,22 +129,22 @@ export type PlayerState = {
 	id: PlayerId
 	playerName: string
 	minecraftName: string
-	playerDeck: Array<CardT>
+	playerDeck: Array<CardInstance>
 	censoredPlayerName: string
 	coinFlips: Array<CurrentCoinFlipT>
 	custom: Record<string, any>
-	hand: Array<CardT>
+	hand: Array<CardInstance>
 	lives: number
-	pile: Array<CardT>
-	discarded: Array<CardT>
+	pile: Array<CardInstance>
+	discarded: Array<CardInstance>
 	hasPlacedHermit: boolean
 
 	pickableSlots: Array<PickInfo> | null
-	cardsCanBePlacedIn: Array<[CardT, Array<PickInfo>]>
+	cardsCanBePlacedIn: Array<[CardInstance, Array<PickInfo>]>
 
 	board: {
 		activeRow: number | null
-		singleUseCard: CardT | null
+		singleUseCard: CardInstance<SingleUse> | null
 		singleUseCardUsed: boolean
 		rows: Array<RowState>
 	}
@@ -164,10 +208,10 @@ export type PlayerState = {
 		 */
 		onTurnStart: GameHook<() => void>
 		/** Hook called at the end of the turn */
-		onTurnEnd: GameHook<(drawCards: Array<CardT | null>) => void>
+		onTurnEnd: GameHook<(drawCards: Array<CardInstance | null>) => void>
 
 		/** Hook called when the player flips a coin */
-		onCoinFlip: GameHook<(card: CardT, coinFlips: Array<CoinFlipT>) => Array<CoinFlipT>>
+		onCoinFlip: GameHook<(card: CardInstance, coinFlips: Array<CoinFlipT>) => Array<CoinFlipT>>
 
 		// @TODO eventually to simplify a lot more code this could potentially be called whenever anything changes the row, using a helper.
 		/** Hook called before the active row is changed. Returns whether or not the change can be completed. */
@@ -299,9 +343,9 @@ export type LocalPlayerState = {
 	lives: number
 	board: {
 		activeRow: number | null
-		singleUseCard: CardT | null
+		singleUseCard: LocalCardInstance | null
 		singleUseCardUsed: boolean
-		rows: Array<RowState>
+		rows: Array<LocalRowState>
 	}
 }
 
@@ -311,9 +355,9 @@ export type LocalGameState = {
 	statusEffects: Array<StatusEffectT>
 
 	// personal data
-	hand: Array<CardT>
+	hand: Array<LocalCardInstance>
 	pileCount: number
-	discarded: Array<CardT>
+	discarded: Array<LocalCardInstance>
 
 	// ids
 	playerId: PlayerId
@@ -324,7 +368,7 @@ export type LocalGameState = {
 		result: ActionResult
 	} | null
 
-	currentCardsCanBePlacedIn: Array<[CardT, Array<PickInfo>]> | null
+	currentCardsCanBePlacedIn: Array<[LocalCardInstance, Array<PickInfo>]> | null
 	currentPickableSlots: Array<PickInfo> | null
 	currentPickMessage: string | null
 	currentModalData: ModalData | null
@@ -349,7 +393,7 @@ export type LocalGameRoot = {
 	localGameState: LocalGameState | null
 	time: number
 
-	selectedCard: CardT | null
+	selectedCard: LocalCardInstance | null
 	openedModal: {
 		id: string
 		info: null
@@ -366,8 +410,8 @@ export type LocalGameRoot = {
 
 export type GameLog = {
 	type: 'public' | 'private'
-	startHand1: string[]
-	startHand2: string[]
+	startHand1: Array<CardInstance>
+	startHand2: Array<CardInstance>
 	startTimestamp: number
 	startDeck: string
 }

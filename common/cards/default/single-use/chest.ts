@@ -3,24 +3,23 @@ import {GameModel} from '../../../models/game-model'
 import {slot} from '../../../slot'
 import {applySingleUse} from '../../../utils/board'
 import {discardSingleUse, retrieveCard} from '../../../utils/movement'
-import SingleUseCard from '../../base/single-use-card'
+import Card, {SingleUse, singleUse} from '../../base/card'
 
-class ChestSingleUseCard extends SingleUseCard {
-	constructor() {
-		super({
-			id: 'chest',
-			numericId: 4,
-			name: 'Chest',
-			rarity: 'rare',
-			description: 'Choose one card from your discard pile to return to your hand.',
-		})
+class ChestSingleUseCard extends Card {
+	props: SingleUse = {
+		...singleUse,
+		id: 'chest',
+		numericId: 4,
+		name: 'Chest',
+		expansion: 'default',
+		rarity: 'rare',
+		tokens: 2,
+		description: 'Choose one card from your discard pile to return to your hand.',
+		attachCondition: slot.every(singleUse.attachCondition, (game, pos) => {
+			if (pos.player.discarded.filter((card) => card.props.id !== 'clock').length <= 0) return false
+			return true
+		}),
 	}
-
-	override _attachCondition = slot.every(super.attachCondition, (game, pos) => {
-		if (pos.player.discarded.filter((card) => card.cardId !== 'clock').length <= 0) return false
-		return true
-	})
-
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
 		const {player} = pos
 

@@ -1,20 +1,20 @@
-import {CARDS} from '../..'
 import {AttackModel} from '../../../models/attack-model'
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {applySingleUse, getActiveRowPos} from '../../../utils/board'
-import SingleUseCard from '../../base/single-use-card'
+import Card, {SingleUse, singleUse} from '../../base/card'
 
-class NetheriteSwordSingleUseCard extends SingleUseCard {
-	constructor() {
-		super({
-			id: 'netherite_sword',
-			numericId: 83,
-			name: 'Netherite Sword',
-			rarity: 'ultra_rare',
-			description: "Do 60hp damage to your opponent's active Hermit.",
-			log: null,
-		})
+class NetheriteSwordSingleUseCard extends Card {
+	props: SingleUse = {
+		...singleUse,
+		id: 'netherite_sword',
+		numericId: 83,
+		name: 'Netherite Sword',
+		expansion: 'default',
+		rarity: 'ultra_rare',
+		tokens: 3,
+		description: "Do 60hp damage to your opponent's active Hermit.",
+		hasAttack: true,
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
@@ -33,7 +33,7 @@ class NetheriteSwordSingleUseCard extends SingleUseCard {
 				type: 'effect',
 				log: (values) =>
 					`${values.defaultLog} to attack ${values.target} for ${values.damage} damage`,
-			}).addDamage(this.id, 60)
+			}).addDamage(this.props.id, 60)
 
 			return swordAttack
 		})
@@ -51,10 +51,6 @@ class NetheriteSwordSingleUseCard extends SingleUseCard {
 		const {player} = pos
 		player.hooks.getAttack.remove(instance)
 		player.hooks.onAttack.remove(instance)
-	}
-
-	override canAttack() {
-		return true
 	}
 }
 

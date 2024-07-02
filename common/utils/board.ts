@@ -1,4 +1,3 @@
-import {CARDS} from '../cards'
 import {STATUS_EFFECT_CLASSES} from '../status-effects'
 import {CardPosModel, getCardPos} from '../models/card-pos-model'
 import {GameModel} from '../models/game-model'
@@ -34,10 +33,10 @@ export function applySingleUse(game: GameModel, slotInfo?: SlotInfo): GenericAct
 
 	const suCard = currentPlayer.board.singleUseCard
 	if (!suCard) return 'FAILURE_NOT_APPLICABLE'
-	const pos = getCardPos(game, suCard.cardInstance)
+	const pos = getCardPos(game, suCard.instance)
 	if (!pos) return 'FAILURE_UNKNOWN_ERROR'
 
-	const cardInstance = currentPlayer.board.singleUseCard?.cardInstance
+	const cardInstance = currentPlayer.board.singleUseCard?.instance
 	if (!cardInstance) return 'FAILURE_NOT_APPLICABLE'
 
 	currentPlayer.hooks.beforeApply.call()
@@ -50,7 +49,7 @@ export function applySingleUse(game: GameModel, slotInfo?: SlotInfo): GenericAct
 	game.addCompletedActions('PLAY_SINGLE_USE_CARD')
 
 	// Create the logs
-	game.battleLog.addPlayCardEntry(CARDS[suCard.cardId], pos, currentPlayer.coinFlips, slotInfo)
+	game.battleLog.addPlayCardEntry(suCard.card, pos, currentPlayer.coinFlips, slotInfo)
 
 	currentPlayer.hooks.afterApply.call()
 

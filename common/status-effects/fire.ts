@@ -27,7 +27,7 @@ class FireStatusEffect extends StatusEffect {
 		const {player, opponentPlayer} = pos
 
 		const hasDamageEffect = game.state.statusEffects.some(
-			(a) => a.targetInstance === pos.card?.cardInstance && a.damageEffect === true
+			(a) => a.targetInstance === pos.card?.instance && a.damageEffect === true
 		)
 
 		if (hasDamageEffect) return
@@ -35,7 +35,7 @@ class FireStatusEffect extends StatusEffect {
 		game.state.statusEffects.push(statusEffectInfo)
 
 		if (pos.card) {
-			game.battleLog.addEntry(player.id, `$p${CARDS[pos.card.cardId].name}$ was $eBurned$`)
+			game.battleLog.addEntry(player.id, `$p${pos.card.props.name}$ was $eBurned$`)
 		}
 
 		opponentPlayer.hooks.onTurnEnd.add(statusEffectInfo.statusEffectInstance, () => {
@@ -73,7 +73,7 @@ class FireStatusEffect extends StatusEffect {
 		player.hooks.afterDefence.add(statusEffectInfo.statusEffectInstance, (attack) => {
 			const attackTarget = attack.getTarget()
 			if (!attackTarget) return
-			if (attackTarget.row.hermitCard.cardInstance !== statusEffectInfo.targetInstance) return
+			if (attackTarget.row.hermitCard.instance !== statusEffectInfo.targetInstance) return
 			if (attackTarget.row.health > 0) return
 			removeStatusEffect(game, pos, statusEffectInfo.statusEffectInstance)
 		})

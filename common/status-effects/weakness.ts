@@ -26,10 +26,7 @@ class WeaknessStatusEffect extends StatusEffect {
 		if (!statusEffectInfo.duration) statusEffectInfo.duration = this.duration
 
 		if (pos.card) {
-			game.battleLog.addEntry(
-				player.id,
-				`$p${CARDS[pos.card.cardId].name}$ was inflicted with $eWeakness$`
-			)
+			game.battleLog.addEntry(player.id, `$p${pos.card.props.name}$ was inflicted with $eWeakness$`)
 		}
 
 		player.hooks.onTurnStart.add(statusEffectInfo.statusEffectInstance, () => {
@@ -64,10 +61,16 @@ class WeaknessStatusEffect extends StatusEffect {
 			const attacker = attack.getAttacker()
 			const opponentActiveHermit = getActiveRow(opponentPlayer)
 
-			if (!attacker || !opponentActiveHermit) return
+			if (
+				!attacker ||
+				!opponentActiveHermit ||
+				!attacker.row.hermitCard.card.isHermit() ||
+				!opponentActiveHermit.hermitCard.card.isHermit()
+			)
+				return
 
-			const attackerType = CARDS[attacker.row.hermitCard.cardId].type
-			const opponentType = CARDS[opponentActiveHermit.hermitCard.cardId].type
+			const attackerType = attacker.row.hermitCard.card.props.type
+			const opponentType = opponentActiveHermit.hermitCard.card.props.type
 
 			if (attackerType !== opponentType) return
 
@@ -77,7 +80,7 @@ class WeaknessStatusEffect extends StatusEffect {
 		player.hooks.afterDefence.add(statusEffectInfo.statusEffectInstance, (attack) => {
 			const attackTarget = attack.getTarget()
 			if (!attackTarget) return
-			if (attackTarget.row.hermitCard.cardInstance !== statusEffectInfo.targetInstance) return
+			if (attackTarget.row.hermitCard.instance !== statusEffectInfo.targetInstance) return
 			if (attackTarget.row.health > 0) return
 			removeStatusEffect(game, pos, statusEffectInfo.statusEffectInstance)
 		})

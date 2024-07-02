@@ -1,43 +1,31 @@
-import HermitCard from '../../base/hermit-card'
+import Card, {hermit, Hermit} from '../../base/card'
 
-class SpookyStressCommonHermitCard extends HermitCard {
-	constructor() {
-		super({
-			id: 'spookystress_common',
-			numericId: 238,
-			name: 'Spooky Stress',
-			rarity: 'common',
-			hermitType: 'pvp',
-			health: 260,
-			primary: {
-				name: 'Giggle',
-				cost: ['pvp'],
-				damage: 60,
-				power: null,
-			},
-			secondary: {
-				name: 'Mingin',
-				cost: ['pvp', 'pvp', 'any'],
-				damage: 90,
-				power: null,
-			},
-		})
-	}
-
-	override getExpansion() {
-		return 'alter_egos_ii'
-	}
-
-	override getPalette() {
-		return 'alter_egos'
-	}
-
-	override getBackground() {
-		return 'alter_egos_background'
-	}
-
-	override getShortName() {
-		return 'S. Stress'
+class SpookyStressCommonHermitCard extends Card {
+	props: Hermit = {
+		...hermit,
+		id: 'spookystress_common',
+		numericId: 238,
+		name: 'Spooky Stress',
+		shortName: 'S. Stress',
+		expansion: 'alter_egos_ii',
+		background: 'alter_egos',
+		palette: 'alter_egos',
+		rarity: 'common',
+		tokens: 0,
+		type: 'pvp',
+		health: 260,
+		primary: {
+			name: 'Giggle',
+			cost: ['pvp'],
+			damage: 60,
+			power: null,
+		},
+		secondary: {
+			name: 'Mingin',
+			cost: ['pvp', 'pvp', 'any'],
+			damage: 90,
+			power: null,
+		},
 	}
 }
 

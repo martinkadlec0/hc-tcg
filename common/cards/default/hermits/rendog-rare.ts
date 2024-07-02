@@ -1,40 +1,40 @@
-import HermitCard from '../../base/hermit-card'
-import {HERMIT_CARDS} from '../..'
 import {GameModel} from '../../../models/game-model'
 import {CardPosModel} from '../../../models/card-pos-model'
 import {HermitAttackType} from '../../../types/attack'
-import {CardT} from '../../../types/game-state'
+import {CardInstance} from '../../../types/game-state'
 import {slot} from '../../../slot'
+import Card, {Hermit, hermit} from '../../base/card'
 
-class RendogRareHermitCard extends HermitCard {
-	constructor() {
-		super({
-			id: 'rendog_rare',
-			numericId: 87,
-			name: 'Rendog',
-			rarity: 'rare',
-			hermitType: 'builder',
-			health: 250,
-			primary: {
-				name: "Comin' At Ya",
-				cost: ['builder'],
-				damage: 50,
-				power: null,
-			},
-			secondary: {
-				name: 'Role Play',
-				cost: ['builder', 'builder', 'builder'],
-				damage: 0,
-				power: "Use an attack from any of your opponent's Hermits.",
-			},
-		})
+class RendogRareHermitCard extends Card {
+	props: Hermit = {
+		...hermit,
+		id: 'rendog_rare',
+		numericId: 87,
+		name: 'Rendog',
+		expansion: 'default',
+		rarity: 'rare',
+		tokens: 2,
+		type: 'builder',
+		health: 250,
+		primary: {
+			name: "Comin' At Ya",
+			cost: ['builder'],
+			damage: 50,
+			power: null,
+		},
+		secondary: {
+			name: 'Role Play',
+			cost: ['builder', 'builder', 'builder'],
+			damage: 0,
+			power: "Use an attack from any of your opponent's Hermits.",
+		},
 	}
 
 	pickCondition = slot.every(
 		slot.opponent,
 		slot.hermitSlot,
 		slot.not(slot.empty),
-		slot.not(slot.hasId(this.id))
+		slot.not(slot.hasId(this.props.id))
 	)
 
 	override getAttack(
@@ -51,15 +51,13 @@ class RendogRareHermitCard extends HermitCard {
 		if (!attack || attack.type !== 'secondary') return attack
 		if (attack.id !== this.getInstanceKey(instance)) return attack
 
-		const imitatingCard: CardT | undefined = player.custom[imitatingCardKey]
+		const imitatingCard: CardInstance | undefined = player.custom[imitatingCardKey]
 
 		if (!imitatingCard) return null
 
 		// No loops please
-		if (imitatingCard.cardId === this.id) return null
-
-		const hermitInfo = HERMIT_CARDS[imitatingCard.cardId]
-		if (!hermitInfo) return null
+		if (imitatingCard.props.id === this.props.id) return null
+		if (!imitatingCard.isHermit()) return null
 
 		const attackType = player.custom[pickedAttackKey]
 		if (!attackType) return null
@@ -67,15 +65,17 @@ class RendogRareHermitCard extends HermitCard {
 		delete player.custom[pickedAttackKey]
 
 		// Return the attack we picked from the card we picked
-		const newAttack = hermitInfo.getAttack(game, imitatingCard.cardInstance, pos, attackType)
+		const newAttack = imitatingCard.card.getAttack(game, imitatingCard.instance, pos, attackType)
 		if (!newAttack) return null
 		const attackName =
-			newAttack.type === 'primary' ? hermitInfo.primary.name : hermitInfo.secondary.name
+			newAttack.type === 'primary'
+				? imitatingCard.props.primary.name
+				: imitatingCard.props.secondary.name
 		newAttack.updateLog(
 			(values) =>
 				`${values.attacker} ${values.coinFlip ? values.coinFlip + ', then ' : ''} attacked ${
 					values.target
-				} with $v${hermitInfo.name}'s ${attackName}$ for ${values.damage} damage`
+				} with $v${imitatingCard.props.name}'s ${attackName}$ for ${values.damage} damage`
 		)
 		return newAttack
 	}
@@ -94,7 +94,7 @@ class RendogRareHermitCard extends HermitCard {
 
 			game.addPickRequest({
 				playerId: player.id,
-				id: this.id,
+				id: this.props.id,
 				message: "Pick one of your opponent's Hermits",
 				canPick: this.pickCondition,
 				onResult(pickedSlot) {
@@ -126,25 +126,21 @@ class RendogRareHermitCard extends HermitCard {
 							player.custom[pickedAttackKey] = attack
 
 							// Replace the hooks of the card we're imitating only if it changed
-							const imitatingCard: CardT | undefined = player.custom[imitatingCardKey]
-							if (!imitatingCard || pickedCard.cardId !== imitatingCard.cardId) {
+							const imitatingCard: CardInstance | undefined = player.custom[imitatingCardKey]
+							if (!imitatingCard || pickedCard.props.id !== imitatingCard.props.id) {
 								if (imitatingCard) {
 									// Detach the old card
-									const hermitInfo = HERMIT_CARDS[imitatingCard.cardId]
-									if (hermitInfo) {
-										hermitInfo.onDetach(game, imitatingCard.cardInstance, pos)
-									}
+									imitatingCard.card.onDetach(game, imitatingCard.instance, pos)
 								}
 
 								// Attach the new card
-								const newHermitInfo = HERMIT_CARDS[pickedCard.cardId]
-								if (newHermitInfo) newHermitInfo.onAttach(game, imitatingCardInstance, pos)
+								pickedCard.card.onAttach(game, imitatingCardInstance, pos)
 
 								// Store which card we are imitating with our own instance
-								player.custom[imitatingCardKey] = {
-									cardId: pickedCard.cardId,
-									cardInstance: imitatingCardInstance,
-								}
+								player.custom[imitatingCardKey] = new CardInstance(
+									pickedCard.card,
+									imitatingCardInstance
+								)
 							}
 
 							// Add the attack requests of the chosen card
@@ -169,13 +165,10 @@ class RendogRareHermitCard extends HermitCard {
 		player.hooks.onActiveRowChange.add(instance, (oldRow, newRow) => {
 			if (pos.rowIndex === oldRow) {
 				// We switched away from ren, delete the imitating card
-				const imitatingCard: CardT | undefined = player.custom[imitatingCardKey]
+				const imitatingCard: CardInstance | undefined = player.custom[imitatingCardKey]
 				if (imitatingCard) {
 					// Detach the old card
-					const hermitInfo = HERMIT_CARDS[imitatingCard.cardId]
-					if (hermitInfo) {
-						hermitInfo.onDetach(game, imitatingCard.cardInstance, pos)
-					}
+					imitatingCard.card.onDetach(game, imitatingCard.instance, pos)
 				}
 			}
 		})
@@ -193,12 +186,9 @@ class RendogRareHermitCard extends HermitCard {
 		const pickedAttackKey = this.getInstanceKey(instance, 'pickedAttack')
 
 		// If the card we are imitating is still attached, detach it
-		const imitatingCard: CardT | undefined = player.custom[imitatingCardKey]
+		const imitatingCard: CardInstance | undefined = player.custom[imitatingCardKey]
 		if (imitatingCard) {
-			const hermitInfo = HERMIT_CARDS[player.custom[imitatingCardKey]]
-			if (hermitInfo) {
-				hermitInfo.onDetach(game, imitatingCard.cardInstance, pos)
-			}
+			imitatingCard.card.onDetach(game, imitatingCard.instance, pos)
 		}
 
 		// Remove hooks and custom data

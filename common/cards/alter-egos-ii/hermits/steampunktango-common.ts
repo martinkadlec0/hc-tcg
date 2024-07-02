@@ -1,43 +1,31 @@
-import HermitCard from '../../base/hermit-card'
+import Card, {hermit, Hermit} from '../../base/card'
 
-class SteampunkTangoCommonHermitCard extends HermitCard {
-	constructor() {
-		super({
-			id: 'steampunktango_common',
-			numericId: 239,
-			name: 'Steampunk Tango',
-			rarity: 'common',
-			hermitType: 'speedrunner',
-			health: 250,
-			primary: {
-				name: 'Create',
-				cost: ['speedrunner'],
-				damage: 60,
-				power: null,
-			},
-			secondary: {
-				name: 'Automate',
-				cost: ['speedrunner', 'any'],
-				damage: 70,
-				power: null,
-			},
-		})
-	}
-
-	override getExpansion() {
-		return 'alter_egos_ii'
-	}
-
-	override getPalette() {
-		return 'alter_egos'
-	}
-
-	override getBackground() {
-		return 'alter_egos_background'
-	}
-
-	override getShortName() {
-		return 'S. Tango'
+class SteampunkTangoCommonHermitCard extends Card {
+	props: Hermit = {
+		...hermit,
+		id: 'steampunktango_common',
+		numericId: 239,
+		name: 'Steampunk Tango',
+		shortName: 'S. Tango',
+		expansion: 'alter_egos_ii',
+		background: 'alter_egos',
+		palette: 'alter_egos',
+		rarity: 'common',
+		tokens: 0,
+		type: 'speedrunner',
+		health: 250,
+		primary: {
+			name: 'Create',
+			cost: ['speedrunner'],
+			damage: 60,
+			power: null,
+		},
+		secondary: {
+			name: 'Automate',
+			cost: ['speedrunner', 'any'],
+			damage: 70,
+			power: null,
+		},
 	}
 }
 

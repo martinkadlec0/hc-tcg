@@ -3,31 +3,34 @@ import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {HermitAttackType} from '../../../types/attack'
 import {flipCoin} from '../../../utils/coinFlips'
-import HermitCard from '../../base/hermit-card'
+import Card, {Hermit, hermit} from '../../base/card'
 
-class GoatfatherRareHermitCard extends HermitCard {
-	constructor() {
-		super({
-			id: 'goatfather_rare',
-			numericId: 129,
-			name: 'Goatfather',
-			rarity: 'rare',
-			hermitType: 'prankster',
-			health: 270,
-			primary: {
-				name: 'Omerta',
-				cost: ['any'],
-				damage: 40,
-				power: null,
-			},
-			secondary: {
-				name: 'Anvil Drop',
-				cost: ['prankster', 'prankster'],
-				damage: 80,
-				power:
-					"Flip a coin.\nIf heads, do an additional 30hp damage to your opponent's active Hermit and 10hp damage to each Hermit below it on the game board.",
-			},
-		})
+class GoatfatherRareHermitCard extends Card {
+	props: Hermit = {
+		...hermit,
+		id: 'goatfather_rare',
+		numericId: 129,
+		name: 'Goatfather',
+		expansion: 'alter_egos',
+		palette: 'alter_egos',
+		background: 'alter_egos',
+		rarity: 'rare',
+		tokens: 2,
+		type: 'prankster',
+		health: 270,
+		primary: {
+			name: 'Omerta',
+			cost: ['any'],
+			damage: 40,
+			power: null,
+		},
+		secondary: {
+			name: 'Anvil Drop',
+			cost: ['prankster', 'prankster'],
+			damage: 80,
+			power:
+				"Flip a coin.\nIf heads, do an additional 30hp damage to your opponent's active Hermit and 10hp damage to each Hermit below it on the game board.",
+		},
 	}
 
 	override getAttack(
@@ -48,7 +51,7 @@ class GoatfatherRareHermitCard extends HermitCard {
 
 		if (coinFlip[0] === 'tails') return attack
 
-		attack.addDamage(this.id, 30)
+		attack.addDamage(this.props.id, 30)
 
 		const activeRow = opponentPlayer.board.activeRow
 		const rows = opponentPlayer.board.rows
@@ -72,23 +75,11 @@ class GoatfatherRareHermitCard extends HermitCard {
 				},
 				type: hermitAttackType,
 				log: (values) => `, ${values.target} for ${values.damage} damage`,
-			}).addDamage(this.id, 10)
+			}).addDamage(this.props.id, 10)
 			attack.addNewAttack(newAttack)
 		}
 
 		return attack
-	}
-
-	override getExpansion() {
-		return 'alter_egos'
-	}
-
-	override getPalette() {
-		return 'alter_egos'
-	}
-
-	override getBackground() {
-		return 'alter_egos_background'
 	}
 }
 

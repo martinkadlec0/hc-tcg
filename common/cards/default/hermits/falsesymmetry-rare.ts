@@ -1,32 +1,32 @@
-import {HERMIT_CARDS} from '../..'
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {healHermit} from '../../../types/game-state'
 import {flipCoin} from '../../../utils/coinFlips'
-import HermitCard from '../../base/hermit-card'
+import Card, {Hermit, hermit} from '../../base/card'
 
-class FalseSymmetryRareHermitCard extends HermitCard {
-	constructor() {
-		super({
-			id: 'falsesymmetry_rare',
-			numericId: 23,
-			name: 'False',
-			rarity: 'rare',
-			hermitType: 'builder',
-			health: 250,
-			primary: {
-				name: 'High Noon',
-				cost: ['builder'],
-				damage: 60,
-				power: null,
-			},
-			secondary: {
-				name: 'Supremacy',
-				cost: ['builder', 'any'],
-				damage: 70,
-				power: 'Flip a coin.\nIf heads, heal this Hermit 40hp.',
-			},
-		})
+class FalseSymmetryRareHermitCard extends Card {
+	props: Hermit = {
+		...hermit,
+		id: 'falsesymmetry_rare',
+		numericId: 23,
+		name: 'False',
+		expansion: 'default',
+		rarity: 'rare',
+		tokens: 1,
+		type: 'builder',
+		health: 250,
+		primary: {
+			name: 'High Noon',
+			cost: ['builder'],
+			damage: 60,
+			power: null,
+		},
+		secondary: {
+			name: 'Supremacy',
+			cost: ['builder', 'any'],
+			damage: 70,
+			power: 'Flip a coin.\nIf heads, heal this Hermit 40hp.',
+		},
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
@@ -43,8 +43,7 @@ class FalseSymmetryRareHermitCard extends HermitCard {
 
 			// Heal 40hp
 			healHermit(pos.row, 40)
-			const hermitInfo = HERMIT_CARDS[attacker.row.hermitCard.cardId]
-			game.battleLog.addEntry(player.id, `$p${hermitInfo.name}$ healed $g40hp$`)
+			game.battleLog.addEntry(player.id, `$p${attacker.row.hermitCard.props.name}$ healed $g40hp$`)
 		})
 	}
 

@@ -1,21 +1,21 @@
-import {CARDS} from '../..'
 import {AttackModel} from '../../../models/attack-model'
 import {CardPosModel} from '../../../models/card-pos-model'
 import {GameModel} from '../../../models/game-model'
 import {applySingleUse, getActiveRowPos} from '../../../utils/board'
-import SingleUseCard from '../../base/single-use-card'
+import Card, {SingleUse, singleUse} from '../../base/card'
 
-class TNTSingleUseCard extends SingleUseCard {
-	constructor() {
-		super({
-			id: 'tnt',
-			numericId: 100,
-			name: 'TNT',
-			rarity: 'common',
-			description:
-				"Do 60hp damage to your opponent's active Hermit. Your active Hermit also takes 20hp damage.",
-			log: null,
-		})
+class TNTSingleUseCard extends Card {
+	props: SingleUse = {
+		...singleUse,
+		id: 'tnt',
+		numericId: 100,
+		name: 'TNT',
+		expansion: 'default',
+		rarity: 'common',
+		tokens: 2,
+		description:
+			"Do 60hp damage to your opponent's active Hermit. Your active Hermit also takes 20hp damage.",
+		hasAttack: true,
 	}
 
 	override onAttach(game: GameModel, instance: string, pos: CardPosModel) {
@@ -34,7 +34,7 @@ class TNTSingleUseCard extends SingleUseCard {
 				type: 'effect',
 				log: (values) =>
 					`${values.defaultLog} to attack ${values.target} for ${values.damage} damage `,
-			}).addDamage(this.id, 60)
+			}).addDamage(this.props.id, 60)
 
 			const backlashAttack = new AttackModel({
 				id: this.getInstanceKey(instance, 'backlash'),
@@ -43,7 +43,7 @@ class TNTSingleUseCard extends SingleUseCard {
 				type: 'effect',
 				isBacklash: true,
 				log: (values) => `and took ${values.damage} backlash damage`,
-			}).addDamage(this.id, 20)
+			}).addDamage(this.props.id, 20)
 
 			tntAttack.addNewAttack(backlashAttack)
 
@@ -63,10 +63,6 @@ class TNTSingleUseCard extends SingleUseCard {
 		const {player} = pos
 		player.hooks.getAttack.remove(instance)
 		player.hooks.onAttack.remove(instance)
-	}
-
-	override canAttack() {
-		return true
 	}
 }
 

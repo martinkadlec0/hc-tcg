@@ -9,7 +9,7 @@ class PythonGBRareHermitCard extends HermitCard {
 			numericId: 216,
 			name: 'Python',
 			rarity: 'rare',
-			hermitType: 'redstone',
+			type: 'redstone',
 			health: 250,
 			primary: {
 				name: 'Say Whaatt',

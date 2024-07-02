@@ -1,33 +1,33 @@
-import HermitCard from '../../base/hermit-card'
-import {CARDS, HERMIT_CARDS} from '../..'
 import {GameModel} from '../../../models/game-model'
 import {CardPosModel} from '../../../models/card-pos-model'
 import {getActiveRow} from '../../../utils/board'
 import {slot} from '../../../slot'
+import Card, {Hermit, hermit} from '../../base/card'
 import {healHermit} from '../../../types/game-state'
 
-class KeralisRareHermitCard extends HermitCard {
-	constructor() {
-		super({
-			id: 'keralis_rare',
-			numericId: 72,
-			name: 'Keralis',
-			rarity: 'rare',
-			hermitType: 'terraform',
-			health: 250,
-			primary: {
-				name: 'Booshes',
-				cost: ['any'],
-				damage: 60,
-				power: null,
-			},
-			secondary: {
-				name: 'Sweet Face',
-				cost: ['terraform', 'terraform', 'any'],
-				damage: 0,
-				power: 'Heal any AFK Hermit 100hp.',
-			},
-		})
+class KeralisRareHermitCard extends Card {
+	props: Hermit = {
+		...hermit,
+		id: 'keralis_rare',
+		numericId: 72,
+		name: 'Keralis',
+		expansion: 'default',
+		rarity: 'rare',
+		tokens: 1,
+		type: 'terraform',
+		health: 250,
+		primary: {
+			name: 'Booshes',
+			cost: ['any'],
+			damage: 60,
+			power: null,
+		},
+		secondary: {
+			name: 'Sweet Face',
+			cost: ['terraform', 'terraform', 'any'],
+			damage: 0,
+			power: 'Heal any AFK Hermit 100hp.',
+		},
 	}
 
 	pickCondition = slot.every(slot.not(slot.activeRow), slot.not(slot.empty), slot.hermitSlot)
@@ -50,7 +50,7 @@ class KeralisRareHermitCard extends HermitCard {
 
 			game.addPickRequest({
 				playerId: player.id,
-				id: this.id,
+				id: this.props.id,
 				message: 'Pick an AFK Hermit from either side of the board',
 				canPick: this.pickCondition,
 				onResult(pickedSlot) {
@@ -78,20 +78,17 @@ class KeralisRareHermitCard extends HermitCard {
 			const pickedRow = pickedPlayer.board.rows[pickedRowIndex]
 			if (!pickedRow || !pickedRow.hermitCard) return
 
-			const pickedHermitInfo = CARDS[pickedRow.hermitCard.cardId]
 			const activeHermit = getActiveRow(player)?.hermitCard
 			if (!activeHermit) return
-			const activeHermitName = HERMIT_CARDS[activeHermit.cardId].name
 
-			if (pickedHermitInfo && activeHermitName) {
-				// Heal
+			if (pickedRow.hermitCard) {
 				healHermit(pickedRow, 100)
 
 				game.battleLog.addEntry(
 					player.id,
-					`$p${pickedHermitInfo.name} (${
-						pickedRowIndex + 1
-					})$ was healed $g100hp$ by $p${activeHermitName}$`
+					`$p${pickedRow.hermitCard.props.name} (${pickedRowIndex + 1})$ was healed $g100hp$ by $p${
+						activeHermit.props.name
+					}$`
 				)
 			}
 

@@ -10,7 +10,7 @@ class SmallishbeansRareHermitCard extends HermitCard {
 			numericId: 219,
 			name: 'Joel',
 			rarity: 'rare',
-			hermitType: 'pvp',
+			type: 'pvp',
 			health: 280,
 			primary: {
 				name: '11ft',

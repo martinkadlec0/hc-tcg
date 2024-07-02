@@ -12,7 +12,7 @@ class MonkeyfarmRareHermitCard extends HermitCard {
 			numericId: 212,
 			name: 'Monkeyfarm',
 			rarity: 'rare',
-			hermitType: 'farm',
+			type: 'farm',
 			health: 250,
 			primary: {
 				name: 'Skull',

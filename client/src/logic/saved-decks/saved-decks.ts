@@ -1,4 +1,4 @@
-import {PlayerDeckT} from 'common/types/deck'
+import {PlayerDeckT, SavedDeckT, deckToSavedDeck, loadSavedDeck} from 'common/types/deck'
 import {validateDeck} from 'common/utils/validation'
 
 export const getActiveDeckName = () => {
@@ -11,9 +11,7 @@ export const setActiveDeck = (name: string) => {
 
 export const isActiveDeckValid = () => {
 	const activeDeckName = getActiveDeckName()
-	const activeDeck = activeDeckName
-		? getSavedDeck(activeDeckName)?.cards.map((card) => card.cardId)
-		: null
+	const activeDeck = activeDeckName ? getSavedDeck(activeDeckName)?.cards : null
 	const activeDeckValid = !!activeDeck && !validateDeck(activeDeck)
 	return activeDeckValid
 }
@@ -21,17 +19,17 @@ export const isActiveDeckValid = () => {
 export const getSavedDeck = (name: string) => {
 	const hash = localStorage.getItem('Deck_' + name)
 
-	let deck: PlayerDeckT | null = null
+	let deck: SavedDeckT | null = null
 	if (hash != null) {
 		deck = JSON.parse(hash)
 	}
 
-	return deck
+	return loadSavedDeck(deck)
 }
 
 export const saveDeck = (deck: PlayerDeckT) => {
 	const hash = 'Deck_' + deck.name
-	localStorage.setItem(hash, JSON.stringify(deck))
+	localStorage.setItem(hash, JSON.stringify(deckToSavedDeck(deck)))
 }
 
 export const deleteDeck = (name: string) => {
